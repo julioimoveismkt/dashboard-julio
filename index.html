@@ -5,173 +5,172 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Relatório Diário — Julio Imóveis</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin:0; padding:0; box-sizing:border-box; }
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #F8F7F4;
-    color: #222;
-    padding: 20px;
-    max-width: 800px;
+    font-family: "Segoe UI", -apple-system, sans-serif;
+    background: #FAFAFA;
+    color: #333;
+    padding: 16px;
+    max-width: 820px;
     margin: 0 auto;
 }
 
+/* HEADER - vermelho Julio */
 .header {
-    background: linear-gradient(135deg, #1B2A4A 0%, #2C3E6B 100%);
+    background: #FF1922;
     border-radius: 16px;
-    padding: 28px 24px;
+    padding: 30px 24px;
     text-align: center;
     margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.12) 0%, transparent 60%);
 }
 .header h1 {
-    color: #D4AF55;
-    font-size: 26px;
-    letter-spacing: 2px;
-    margin-bottom: 6px;
+    color: white;
+    font-size: 28px;
+    letter-spacing: 3px;
+    font-weight: 800;
+    position: relative;
 }
 .header .subtitle {
-    color: #CBD5E1;
+    color: rgba(255,255,255,0.85);
     font-size: 16px;
+    margin-top: 4px;
+    position: relative;
 }
 .header .date {
     color: white;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
-    margin-top: 12px;
-    background: rgba(255,255,255,0.1);
+    margin-top: 14px;
+    background: rgba(0,0,0,0.15);
     display: inline-block;
-    padding: 8px 24px;
+    padding: 10px 28px;
     border-radius: 30px;
+    position: relative;
 }
 
+/* CARDS */
 .cards {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
     margin-bottom: 24px;
 }
 .card {
     background: white;
-    border-radius: 16px;
-    padding: 24px;
+    border-radius: 14px;
+    padding: 22px 16px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border: 1px solid #E8E5E0;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    border: 1px solid #EDEBE8;
 }
-.card .icon {
-    font-size: 32px;
-    margin-bottom: 8px;
-}
+.card .icon { font-size: 28px; margin-bottom: 6px; }
 .card .number {
-    font-size: 48px;
+    font-size: 44px;
     font-weight: 800;
-    line-height: 1;
+    line-height: 1.1;
 }
 .card .label {
-    font-size: 15px;
+    font-size: 14px;
     color: #888;
-    margin-top: 6px;
-    font-weight: 500;
+    margin-top: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
-.card.locacao .number { color: #1B2A4A; }
-.card.vendas .number { color: #059669; }
-.card.admin .number { color: #D97706; }
-.card.total .number { color: #D4AF55; }
-.card.total {
-    background: linear-gradient(135deg, #1B2A4A 0%, #2C3E6B 100%);
+.card.highlight {
+    background: #FF1922;
     border: none;
 }
-.card.total .number { color: #D4AF55; }
-.card.total .label { color: #CBD5E1; }
-.card.total .icon { filter: none; }
+.card.highlight .number { color: white; }
+.card.highlight .label { color: rgba(255,255,255,0.8); }
 
+/* SECTIONS */
 .section {
     background: white;
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 28px 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border: 1px solid #E8E5E0;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    border: 1px solid #EDEBE8;
 }
 .section h2 {
-    font-size: 20px;
-    color: #1B2A4A;
+    font-size: 21px;
+    color: #111;
     margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #E8E5E0;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #F0EEEB;
     display: flex;
     align-items: center;
     gap: 10px;
 }
-.section h2 .badge {
-    background: #1B2A4A;
+.badge {
+    background: #FF1922;
     color: white;
-    font-size: 16px;
-    padding: 4px 14px;
+    font-size: 15px;
+    padding: 5px 16px;
     border-radius: 20px;
     font-weight: 700;
 }
-.section h2 .badge.green { background: #059669; }
-.section h2 .badge.orange { background: #D97706; }
+.badge.green { background: #059669; }
+.badge.orange { background: #D97706; }
 
+/* INSIGHT BOX */
 .insight {
-    background: #FFF9E6;
-    border-left: 4px solid #D4AF55;
-    padding: 14px 18px;
-    border-radius: 0 10px 10px 0;
-    margin-top: 16px;
-    font-size: 15px;
-    color: #5C4B1A;
-    line-height: 1.5;
+    background: #FFF5F5;
+    border-left: 4px solid #FF1922;
+    padding: 16px 20px;
+    border-radius: 0 12px 12px 0;
+    margin-top: 18px;
+    font-size: 16px;
+    color: #444;
+    line-height: 1.6;
 }
-.insight strong { color: #92710C; }
 
+/* COMPARATIVO */
 .comp-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 18px 0;
-    border-bottom: 1px solid #F0EDE8;
+    padding: 20px 0;
+    border-bottom: 1px solid #F0EEEB;
 }
 .comp-row:last-child { border-bottom: none; }
-.comp-label {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-}
-.comp-values {
+.comp-label { font-size: 20px; font-weight: 600; color: #333; }
+.comp-numbers {
     display: flex;
-    gap: 20px;
     align-items: center;
+    gap: 16px;
 }
-.comp-prev {
-    color: #AAA;
-    font-size: 18px;
-}
-.comp-arrow {
-    font-size: 20px;
-    color: #AAA;
-}
-.comp-current {
-    font-size: 24px;
-    font-weight: 800;
-    color: #1B2A4A;
-}
+.comp-prev { color: #BBB; font-size: 22px; text-decoration: line-through; }
+.comp-current { font-size: 28px; font-weight: 800; color: #111; }
 
+/* FOOTER */
 .footer {
     text-align: center;
-    padding: 20px;
-    color: #AAA;
+    padding: 24px;
+    color: #BBB;
     font-size: 13px;
     line-height: 1.6;
 }
+.footer strong { color: #FF1922; }
 
-@media (max-width: 480px) {
-    .cards { grid-template-columns: 1fr 1fr; gap: 10px; }
+/* RESPONSIVE */
+@media (max-width: 600px) {
+    .cards { grid-template-columns: repeat(2, 1fr); }
     .card .number { font-size: 36px; }
-    .card { padding: 16px; }
-    body { padding: 12px; }
+    body { padding: 10px; }
     .section { padding: 20px 16px; }
-    div[style*="width:160px"] { width: 100px !important; font-size: 14px !important; }
+    div[style*="width:170px"] { width: 110px !important; font-size: 14px !important; }
+    .comp-current { font-size: 22px; }
 }
 </style>
 </head>
@@ -180,26 +179,26 @@ body {
 <div class="header">
     <h1>JULIO IMÓVEIS</h1>
     <div class="subtitle">Relatório Diário de Atendimentos</div>
-    <div class="date">📅 Segunda-Feira, 05/10/2026</div>
+    <div class="date">Segunda-Feira, 05 de Outubro</div>
 </div>
 
 <div class="cards">
-    <div class="card locacao">
+    <div class="card">
         <div class="icon">🏠</div>
-        <div class="number">47</div>
+        <div class="number" style="color:#111;">47</div>
         <div class="label">Locação</div>
     </div>
-    <div class="card vendas">
+    <div class="card">
         <div class="icon">🔑</div>
-        <div class="number">2</div>
+        <div class="number" style="color:#059669;">2</div>
         <div class="label">Vendas</div>
     </div>
-    <div class="card admin">
+    <div class="card">
         <div class="icon">📞</div>
-        <div class="number">18</div>
-        <div class="label">Administrativo</div>
+        <div class="number" style="color:#D97706;">18</div>
+        <div class="label">Admin</div>
     </div>
-    <div class="card total">
+    <div class="card highlight">
         <div class="icon">📊</div>
         <div class="number">67</div>
         <div class="label">Total do Dia</div>
@@ -209,84 +208,81 @@ body {
 <div class="section">
     <h2>🏠 Locação <span class="badge">47 atendimentos</span></h2>
     
-        <div style="display:flex; align-items:center; margin-bottom:14px; gap:12px;">
-            <div style="width:160px; font-size:17px; color:#333; font-weight:500; text-align:right;">H-TALKS Leads</div>
-            <div style="flex:1; height:36px; background:#F0F0F0; border-radius:8px; overflow:hidden; position:relative;">
-                <div style="height:100%; width:100%; background:#0891B2; border-radius:8px; transition:width 0.6s;"></div>
+        <div style="display:flex;align-items:center;margin-bottom:16px;gap:14px;">
+            <div style="width:170px;font-size:18px;color:#333;font-weight:600;text-align:right;">H-TALKS Leads</div>
+            <div style="flex:1;height:40px;background:#F0EEEB;border-radius:8px;overflow:hidden;">
+                <div style="height:100%;width:100%;background:#FF1922;border-radius:8px;"></div>
             </div>
-            <div style="width:45px; text-align:right; font-size:22px; font-weight:700; color:#222;">14</div>
-            <div style="width:60px; text-align:right; font-size:16px; color:#888;">29.8%</div>
+            <div style="min-width:40px;text-align:center;font-size:26px;font-weight:800;color:#222;">14</div>
+            <div style="min-width:55px;text-align:right;font-size:17px;color:#999;font-weight:500;">29.8%</div>
         </div>
-        <div style="display:flex; align-items:center; margin-bottom:14px; gap:12px;">
-            <div style="width:160px; font-size:17px; color:#333; font-weight:500; text-align:right;">Grupo OLX</div>
-            <div style="flex:1; height:36px; background:#F0F0F0; border-radius:8px; overflow:hidden; position:relative;">
-                <div style="height:100%; width:93%; background:#6B21A8; border-radius:8px; transition:width 0.6s;"></div>
+        <div style="display:flex;align-items:center;margin-bottom:16px;gap:14px;">
+            <div style="width:170px;font-size:18px;color:#333;font-weight:600;text-align:right;">Grupo OLX</div>
+            <div style="flex:1;height:40px;background:#F0EEEB;border-radius:8px;overflow:hidden;">
+                <div style="height:100%;width:93%;background:#FF1922;border-radius:8px;"></div>
             </div>
-            <div style="width:45px; text-align:right; font-size:22px; font-weight:700; color:#222;">13</div>
-            <div style="width:60px; text-align:right; font-size:16px; color:#888;">27.7%</div>
+            <div style="min-width:40px;text-align:center;font-size:26px;font-weight:800;color:#222;">13</div>
+            <div style="min-width:55px;text-align:right;font-size:17px;color:#999;font-weight:500;">27.7%</div>
         </div>
-        <div style="display:flex; align-items:center; margin-bottom:14px; gap:12px;">
-            <div style="width:160px; font-size:17px; color:#333; font-weight:500; text-align:right;">Google</div>
-            <div style="flex:1; height:36px; background:#F0F0F0; border-radius:8px; overflow:hidden; position:relative;">
-                <div style="height:100%; width:71%; background:#4285F4; border-radius:8px; transition:width 0.6s;"></div>
+        <div style="display:flex;align-items:center;margin-bottom:16px;gap:14px;">
+            <div style="width:170px;font-size:18px;color:#333;font-weight:600;text-align:right;">Google</div>
+            <div style="flex:1;height:40px;background:#F0EEEB;border-radius:8px;overflow:hidden;">
+                <div style="height:100%;width:71%;background:#FF1922;border-radius:8px;"></div>
             </div>
-            <div style="width:45px; text-align:right; font-size:22px; font-weight:700; color:#222;">10</div>
-            <div style="width:60px; text-align:right; font-size:16px; color:#888;">21.3%</div>
+            <div style="min-width:40px;text-align:center;font-size:26px;font-weight:800;color:#222;">10</div>
+            <div style="min-width:55px;text-align:right;font-size:17px;color:#999;font-weight:500;">21.3%</div>
         </div>
-        <div style="display:flex; align-items:center; margin-bottom:14px; gap:12px;">
-            <div style="width:160px; font-size:17px; color:#333; font-weight:500; text-align:right;">Chaves na Mão</div>
-            <div style="flex:1; height:36px; background:#F0F0F0; border-radius:8px; overflow:hidden; position:relative;">
-                <div style="height:100%; width:64%; background:#059669; border-radius:8px; transition:width 0.6s;"></div>
+        <div style="display:flex;align-items:center;margin-bottom:16px;gap:14px;">
+            <div style="width:170px;font-size:18px;color:#333;font-weight:600;text-align:right;">Chaves na Mão</div>
+            <div style="flex:1;height:40px;background:#F0EEEB;border-radius:8px;overflow:hidden;">
+                <div style="height:100%;width:64%;background:#FF1922;border-radius:8px;"></div>
             </div>
-            <div style="width:45px; text-align:right; font-size:22px; font-weight:700; color:#222;">9</div>
-            <div style="width:60px; text-align:right; font-size:16px; color:#888;">19.1%</div>
+            <div style="min-width:40px;text-align:center;font-size:26px;font-weight:800;color:#222;">9</div>
+            <div style="min-width:55px;text-align:right;font-size:17px;color:#999;font-weight:500;">19.1%</div>
         </div>
-        <div style="display:flex; align-items:center; margin-bottom:14px; gap:12px;">
-            <div style="width:160px; font-size:17px; color:#333; font-weight:500; text-align:right;">Outros</div>
-            <div style="flex:1; height:36px; background:#F0F0F0; border-radius:8px; overflow:hidden; position:relative;">
-                <div style="height:100%; width:7%; background:#9CA3AF; border-radius:8px; transition:width 0.6s;"></div>
+        <div style="display:flex;align-items:center;margin-bottom:16px;gap:14px;">
+            <div style="width:170px;font-size:18px;color:#333;font-weight:600;text-align:right;">Outros</div>
+            <div style="flex:1;height:40px;background:#F0EEEB;border-radius:8px;overflow:hidden;">
+                <div style="height:100%;width:7%;background:#FF1922;border-radius:8px;"></div>
             </div>
-            <div style="width:45px; text-align:right; font-size:22px; font-weight:700; color:#222;">1</div>
-            <div style="width:60px; text-align:right; font-size:16px; color:#888;">2.1%</div>
+            <div style="min-width:40px;text-align:center;font-size:26px;font-weight:800;color:#222;">1</div>
+            <div style="min-width:55px;text-align:right;font-size:17px;color:#999;font-weight:500;">2.1%</div>
         </div>
     <div class="insight">
-        <strong>📌 Destaque:</strong> Os portais imobiliários (H-TALKS + Grupo OLX) respondem por <strong>57%</strong> dos atendimentos de locação. Google aparece forte com <strong>10</strong> atendimentos (21%).
+        <b>H-TALKS Leads</b> lidera com <b>14</b> atendimentos (30% do total). Em segundo, <b>Grupo OLX</b> com <b>13</b> (28%).
     </div>
 </div>
 
 <div class="section">
     <h2>🔑 Vendas <span class="badge green">2 atendimentos</span></h2>
     
-        <div style="display:flex; align-items:center; margin-bottom:14px; gap:12px;">
-            <div style="width:160px; font-size:17px; color:#333; font-weight:500; text-align:right;">Google</div>
-            <div style="flex:1; height:36px; background:#F0F0F0; border-radius:8px; overflow:hidden; position:relative;">
-                <div style="height:100%; width:100%; background:#4285F4; border-radius:8px; transition:width 0.6s;"></div>
+        <div style="display:flex;align-items:center;margin-bottom:16px;gap:14px;">
+            <div style="width:170px;font-size:18px;color:#333;font-weight:600;text-align:right;">Google</div>
+            <div style="flex:1;height:40px;background:#F0EEEB;border-radius:8px;overflow:hidden;">
+                <div style="height:100%;width:100%;background:#059669;border-radius:8px;"></div>
             </div>
-            <div style="width:45px; text-align:right; font-size:22px; font-weight:700; color:#222;">2</div>
-            <div style="width:60px; text-align:right; font-size:16px; color:#888;">100.0%</div>
+            <div style="min-width:40px;text-align:center;font-size:26px;font-weight:800;color:#222;">2</div>
+            <div style="min-width:55px;text-align:right;font-size:17px;color:#999;font-weight:500;">100.0%</div>
         </div>
-    <div class="insight">
-        <strong>📌 Observação:</strong> Volume baixo de vendas hoje (2 atendimentos). Todos vieram do Google.
-    </div>
 </div>
 
 <div class="section">
-    <h2>📞 Administrativo <span class="badge orange">18 atendimentos</span></h2>
-    <div style="display:flex; align-items:center; margin-bottom:14px; gap:12px;">
-        <div style="width:160px; font-size:17px; color:#333; font-weight:500; text-align:right;">Ligação</div>
-        <div style="flex:1; height:36px; background:#F0F0F0; border-radius:8px; overflow:hidden;">
-            <div style="height:100%; width:44%; background:#6366F1; border-radius:8px;"></div>
+    <h2>📞 Administrativo <span class="badge orange">18</span></h2>
+    <div style="display:flex;align-items:center;margin-bottom:16px;gap:14px;">
+        <div style="width:170px;font-size:18px;color:#333;font-weight:600;text-align:right;">Ligação</div>
+        <div style="flex:1;height:40px;background:#F0EEEB;border-radius:8px;overflow:hidden;">
+            <div style="height:100%;width:44%;background:#D97706;border-radius:8px;"></div>
         </div>
-        <div style="width:45px; text-align:right; font-size:22px; font-weight:700; color:#222;">8</div>
-        <div style="width:60px; text-align:right; font-size:16px; color:#888;">44.4%</div>
+        <div style="min-width:40px;text-align:center;font-size:26px;font-weight:800;color:#222;">8</div>
+        <div style="min-width:55px;text-align:right;font-size:17px;color:#999;">44.4%</div>
     </div>
-    <div style="display:flex; align-items:center; margin-bottom:14px; gap:12px;">
-        <div style="width:160px; font-size:17px; color:#333; font-weight:500; text-align:right;">Recepção</div>
-        <div style="flex:1; height:36px; background:#F0F0F0; border-radius:8px; overflow:hidden;">
-            <div style="height:100%; width:56%; background:#8B5CF6; border-radius:8px;"></div>
+    <div style="display:flex;align-items:center;margin-bottom:16px;gap:14px;">
+        <div style="width:170px;font-size:18px;color:#333;font-weight:600;text-align:right;">Recepção</div>
+        <div style="flex:1;height:40px;background:#F0EEEB;border-radius:8px;overflow:hidden;">
+            <div style="height:100%;width:56%;background:#D97706;border-radius:8px;"></div>
         </div>
-        <div style="width:45px; text-align:right; font-size:22px; font-weight:700; color:#222;">10</div>
-        <div style="width:60px; text-align:right; font-size:16px; color:#888;">55.6%</div>
+        <div style="min-width:40px;text-align:center;font-size:26px;font-weight:800;color:#222;">10</div>
+        <div style="min-width:55px;text-align:right;font-size:17px;color:#999;">55.6%</div>
     </div>
 </div>
 
@@ -294,31 +290,29 @@ body {
     <h2>📊 Comparação com Sábado (03/10)</h2>
     <div class="comp-row">
         <span class="comp-label">🏠 Locação</span>
-        <div class="comp-values">
+        <div class="comp-numbers">
             <span class="comp-prev">21</span>
-            <span class="comp-arrow">→</span>
             <span class="comp-current">47</span>
-            <span style="color:#16A34A; font-size:20px; font-weight:700;">▲ +26 (+124%)</span>
+            <div style="color:#16A34A;font-size:22px;font-weight:700;">▲ +26 <span style="font-size:16px;">(+124%)</span></div>
         </div>
     </div>
     <div class="comp-row">
         <span class="comp-label">🔑 Vendas</span>
-        <div class="comp-values">
+        <div class="comp-numbers">
             <span class="comp-prev">3</span>
-            <span class="comp-arrow">→</span>
             <span class="comp-current">2</span>
-            <span style="color:#DC2626; font-size:20px; font-weight:700;">▼ -1 (-33%)</span>
+            <div style="color:#DC2626;font-size:22px;font-weight:700;">▼ -1 <span style="font-size:16px;">(-33%)</span></div>
         </div>
     </div>
     <div class="insight">
-        <strong>📌 Leitura:</strong> Segunda-feira com volume forte de locação (▲ +124% vs sábado), padrão normal pós-fim de semana. Vendas caíram, mas o volume de sábado já era baixo (3). Observar se vendas se recuperam ao longo da semana.
+        Segunda-feira com volume forte de locação, padrão normal pós-fim de semana. Acompanhar vendas ao longo da semana.
     </div>
 </div>
 
 <div class="footer">
-    Gerado automaticamente por <strong>Big Julio</strong> · 06/10/2026 19:51<br>
-    Fonte: CRM ImóvelOffice · Dados administrativos da planilha de recepção<br>
-    <span style="color:#D4AF55;">Julio Imóveis — Brusque/SC</span>
+    Gerado por <strong>Big Julio</strong> · 06/10/2026 20:02<br>
+    Fonte: CRM ImóvelOffice<br>
+    <strong>Julio Imóveis</strong> — Brusque/SC
 </div>
 
 </body>
