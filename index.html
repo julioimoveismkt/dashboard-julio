@@ -46,24 +46,20 @@ section {
   border-radius:12px; padding:24px; margin-bottom:18px;
 }
 section h2 {
-  font-size:1rem; font-weight:700; color:var(--ink);
-  display:flex; align-items:center; gap:8px;
+  font-size:1rem; font-weight:700; display:flex; align-items:center; gap:8px;
   padding-bottom:14px; border-bottom:2px solid var(--rule); margin-bottom:18px;
 }
 h2 .tag { font-size:.75rem; font-weight:700; padding:3px 12px; border-radius:20px; color:#fff; }
-h2 .tag.r { background:var(--red); }
-h2 .tag.g { background:var(--green); }
-h2 .tag.a { background:var(--amber); }
+h2 .tag.r { background:var(--red); } h2 .tag.g { background:var(--green); } h2 .tag.a { background:var(--amber); }
 table { width:100%; border-collapse:collapse; }
 td { padding:7px 0; vertical-align:middle; }
 td.or { width:140px; font-size:.88rem; font-weight:600; color:var(--ink2); text-align:right; padding-right:14px; }
-td.br { width:auto; }
 .track { height:32px; background:var(--rule); border-radius:6px; overflow:hidden; }
-.fill { height:100%; border-radius:6px; background:var(--red); transition:width .5s ease; }
+.fill { height:100%; border-radius:6px; background:var(--red); }
 section.vendas .fill { background:var(--green); }
 section.admin .fill { background:var(--amber); }
-td.vl { width:36px; text-align:center; font-size:1.3rem; font-weight:800; color:var(--ink); padding-left:12px; }
-td.pc { width:52px; text-align:right; font-size:.82rem; color:var(--ink3); font-weight:500; }
+td.vl { width:36px; text-align:center; font-size:1.3rem; font-weight:800; padding-left:12px; }
+td.pc { width:52px; text-align:right; font-size:.82rem; color:var(--ink3); }
 .note { margin-top:16px; padding:14px 18px; border-radius:8px; font-size:.88rem; line-height:1.6; color:var(--ink2); }
 .note.r { background:var(--red-light); border-left:3px solid var(--red); }
 .note.g { background:var(--green-bg); border-left:3px solid var(--green); }
@@ -72,8 +68,7 @@ td.pc { width:52px; text-align:right; font-size:.82rem; color:var(--ink3); font-
 .cmp { list-style:none; }
 .cmp li { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid var(--rule); font-size:.95rem; }
 .cmp li:last-child { border:0; }
-.cmp .lbl { font-weight:600; }
-.cmp .nums { display:flex; align-items:center; gap:14px; }
+.cmp .lbl { font-weight:600; } .cmp .nums { display:flex; align-items:center; gap:14px; }
 .cmp .prev { color:var(--ink3); text-decoration:line-through; font-size:1.1rem; }
 .cmp .now { font-weight:800; font-size:1.4rem; }
 .up { color:var(--green); font-weight:700; font-size:.9rem; }
@@ -81,10 +76,8 @@ td.pc { width:52px; text-align:right; font-size:.82rem; color:var(--ink3); font-
 footer { text-align:center; padding:24px 0 0; font-size:.72rem; color:var(--ink3); line-height:1.7; }
 footer b { color:var(--red); }
 @media(max-width:600px) {
-  html { font-size:15px; }
-  .scores { grid-template-columns:repeat(2,1fr); }
-  td.or { width:90px; font-size:.78rem; padding-right:8px; }
-  .sc strong { font-size:2rem; }
+  html { font-size:15px; } .scores { grid-template-columns:repeat(2,1fr); }
+  td.or { width:90px; font-size:.78rem; } .sc strong { font-size:2rem; }
 }
 </style>
 </head>
@@ -97,107 +90,108 @@ footer b { color:var(--red); }
 </header>
 
 <div class="scores">
-  <div class="sc"><em>🏠</em><strong>38</strong><span>Locação</span></div>
-  <div class="sc"><em>🔑</em><strong style="color:var(--green)">4</strong><span>Vendas</span></div>
-  <div class="sc"><em>📞</em><strong style="color:var(--amber)">38</strong><span>Administrativo</span></div>
-  <div class="sc hero"><em>📊</em><strong>80</strong><span>Total do dia</span></div>
+  <div class="sc"><em>🏠</em><strong>40</strong><span>Locação</span></div>
+  <div class="sc"><em>🔑</em><strong style="color:var(--green)">8</strong><span>Vendas</span></div>
+  <div class="sc"><em>📞</em><strong style="color:var(--amber)">20</strong><span>Admin</span></div>
+  <div class="sc hero"><em>📊</em><strong>68</strong><span>Total do dia</span></div>
 </div>
 
 <section>
-  <h2>🏠 Locação <span class="tag r">38</span></h2>
+  <h2>🏠 Locação <span class="tag r">40</span></h2>
   <table><tr>
 <td class="or">Google</td>
 <td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td>
-<td class="vl">12</td>
-<td class="pc">31.6%</td>
+<td class="vl">10</td>
+<td class="pc">25.0%</td>
 </tr><tr>
 <td class="or">WhatsApp</td>
-<td class="br"><div class="track"><div class="fill" style="width:83%"></div></div></td>
-<td class="vl">10</td>
-<td class="pc">26.3%</td>
-</tr><tr>
-<td class="or">Chaves na Mão</td>
-<td class="br"><div class="track"><div class="fill" style="width:58%"></div></div></td>
-<td class="vl">7</td>
-<td class="pc">18.4%</td>
+<td class="br"><div class="track"><div class="fill" style="width:90%"></div></div></td>
+<td class="vl">9</td>
+<td class="pc">22.5%</td>
 </tr><tr>
 <td class="or">Grupo OLX</td>
-<td class="br"><div class="track"><div class="fill" style="width:42%"></div></div></td>
-<td class="vl">5</td>
-<td class="pc">13.2%</td>
+<td class="br"><div class="track"><div class="fill" style="width:90%"></div></div></td>
+<td class="vl">9</td>
+<td class="pc">22.5%</td>
+</tr><tr>
+<td class="or">Chaves na Mão</td>
+<td class="br"><div class="track"><div class="fill" style="width:70%"></div></div></td>
+<td class="vl">7</td>
+<td class="pc">17.5%</td>
 </tr><tr>
 <td class="or">Site Julio</td>
-<td class="br"><div class="track"><div class="fill" style="width:17%"></div></div></td>
-<td class="vl">2</td>
-<td class="pc">5.3%</td>
+<td class="br"><div class="track"><div class="fill" style="width:30%"></div></div></td>
+<td class="vl">3</td>
+<td class="pc">7.5%</td>
 </tr><tr>
 <td class="or">Presencial</td>
-<td class="br"><div class="track"><div class="fill" style="width:8%"></div></div></td>
+<td class="br"><div class="track"><div class="fill" style="width:10%"></div></div></td>
 <td class="vl">1</td>
-<td class="pc">2.6%</td>
+<td class="pc">2.5%</td>
 </tr><tr>
 <td class="or">Ligação</td>
-<td class="br"><div class="track"><div class="fill" style="width:8%"></div></div></td>
+<td class="br"><div class="track"><div class="fill" style="width:10%"></div></div></td>
 <td class="vl">1</td>
-<td class="pc">2.6%</td>
+<td class="pc">2.5%</td>
 </tr></table>
   <div class="note r">
-    <b>Google</b> lidera com 12 atendimentos (31.6%).
-    <b>WhatsApp</b> (incluindo H-TALKS) soma 10 (26.3%).
-    <b>Site Julio</b> trouxe 2 atendimentos diretos.
+    <b>WhatsApp</b> lidera com 9 atendimentos (22.5%).
+    <b>Google</b> com 10 (25.0%).
+    <b>Site Julio</b> trouxe 3 diretos.
   </div>
 </section>
 
 <section class="vendas">
-  <h2>🔑 Vendas <span class="tag g">4</span></h2>
+  <h2>🔑 Vendas <span class="tag g">8</span></h2>
   <table><tr>
 <td class="or">Google</td>
 <td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td>
-<td class="vl">2</td>
-<td class="pc">50.0%</td>
-</tr><tr>
-<td class="or">WhatsApp</td>
-<td class="br"><div class="track"><div class="fill" style="width:50%"></div></div></td>
-<td class="vl">1</td>
-<td class="pc">25.0%</td>
+<td class="vl">3</td>
+<td class="pc">37.5%</td>
 </tr><tr>
 <td class="or">Tráfego Tiago</td>
-<td class="br"><div class="track"><div class="fill" style="width:50%"></div></div></td>
-<td class="vl">1</td>
+<td class="br"><div class="track"><div class="fill" style="width:67%"></div></div></td>
+<td class="vl">2</td>
 <td class="pc">25.0%</td>
+</tr><tr>
+<td class="or">Grupo OLX</td>
+<td class="br"><div class="track"><div class="fill" style="width:67%"></div></div></td>
+<td class="vl">2</td>
+<td class="pc">25.0%</td>
+</tr><tr>
+<td class="or">WhatsApp</td>
+<td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td>
+<td class="vl">1</td>
+<td class="pc">12.5%</td>
 </tr></table>
-  <div class="note g">
-    Vendas com 4 atendimentos — dobrou vs ontem (2).
-  </div>
 </section>
 
 <section class="admin">
-  <h2>📞 Administrativo <span class="tag a">38</span></h2>
+  <h2>📞 Administrativo <span class="tag a">20</span></h2>
   <table>
-    <tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:16%"></div></div></td><td class="vl">6</td><td class="pc">15.8%</td></tr>
-    <tr><td class="or">Recepção</td><td class="br"><div class="track"><div class="fill" style="width:84%"></div></div></td><td class="vl">32</td><td class="pc">84.2%</td></tr>
+    <tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:15%"></div></div></td><td class="vl">3</td><td class="pc">15.0%</td></tr>
+    <tr><td class="or">Recepção</td><td class="br"><div class="track"><div class="fill" style="width:85%"></div></div></td><td class="vl">17</td><td class="pc">85.0%</td></tr>
   </table>
-  <div class="note a">
-    Dados reais da planilha de recepção (SharePoint).
-  </div>
+  <div class="note a">Dados da planilha de recepção (SharePoint) — apenas ADM Locação + ADM Vendas + FEX Seguros.</div>
 </section>
 
 <section>
   <h2>📊 Comparação com segunda (05/10)</h2>
   <ul class="cmp">
-    <li><span class="lbl">🏠 Locação</span><span class="nums"><span class="prev">47</span><span class="now">38</span><span class="dn">-9 (-19%)</span></span></li>
-    <li><span class="lbl">🔑 Vendas</span><span class="nums"><span class="prev">2</span><span class="now">4</span><span class="up">+2 (+100%)</span></span></li>
+    <li><span class="lbl">🏠 Locação</span><span class="nums"><span class="prev">67</span><span class="now">40</span><span class="dn">-27 (-40%)</span></span></li>
+    <li><span class="lbl">🔑 Vendas</span><span class="nums"><span class="prev">10</span><span class="now">8</span><span class="dn">-2 (-20%)</span></span></li>
   </ul>
   <div class="note r">
-    Locação caiu vs segunda (normal — segunda acumula fim de semana). Vendas dobraram.
+    Terça com queda natural vs segunda (segunda acumula fim de semana). Locação -40%, vendas -20%.
   </div>
 </section>
 
 <footer>
-  Gerado por <b>Big Julio</b> · 07/10/2026 11:25<br>
-  Fonte: CRM ImóvelOffice + Planilha de Recepção (SharePoint)<br>
+  Gerado por <b>Big Julio</b> · 07/10/2026 13:35<br>
+  Fonte: CRM ImóvelOffice (cadastro + horário) + Planilha Recepção (SharePoint)<br>
+  Regra: cadastrados entre 05/10 18h e 06/10 18h + finalizados do período<br>
   <b>Julio Imóveis</b> — Brusque, SC
 </footer>
 
-<!-- deploy 1791372884 --></body>
+</body>
 </html>
