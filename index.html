@@ -3,423 +3,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atendimentos — Julio Imóveis — 06/10/2026</title>
+<title>Atendimentos do Dia — Julio Imóveis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg-primary: #0d1117;
-    --bg-secondary: #161b22;
-    --bg-card: #1c2333;
-    --border: #30363d;
-    --text-primary: #e6edf3;
-    --text-secondary: #8b949e;
-    --gold: #d4a645;
-    --gold-dim: rgba(212, 166, 69, 0.15);
-    --blue: #4a9fd4;
-    --blue-dim: rgba(74, 159, 212, 0.15);
-    --green: #3fb950;
-    --red: #f85149;
-    --gray: #6e7681;
-    --purple: #a78bfa;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    line-height: 1.5;
-    padding: 16px;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  /* Header */
-  .header {
-    text-align: center;
-    padding: 24px 16px;
-    border-bottom: 2px solid var(--gold);
-    margin-bottom: 24px;
-  }
-  .header .logo {
-    font-size: 1.4em;
-    font-weight: 700;
-    color: var(--gold);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  .header .subtitle {
-    font-size: 0.95em;
-    color: var(--text-secondary);
-    margin-top: 4px;
-  }
-  .header .date {
-    font-size: 1.6em;
-    font-weight: 700;
-    margin-top: 8px;
-  }
-  .header .day {
-    font-size: 1em;
-    color: var(--gold);
-  }
-
-  /* Totals strip */
-  .totals {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  @media (max-width: 500px) {
-    .totals { grid-template-columns: repeat(2, 1fr); }
-  }
-  .total-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-  }
-  .total-card .label {
-    font-size: 0.75em;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .total-card .number {
-    font-size: 2.2em;
-    font-weight: 800;
-    margin: 4px 0;
-  }
-  .total-card.locacao .number { color: var(--gold); }
-  .total-card.vendas .number { color: var(--blue); }
-  .total-card.admin .number { color: var(--purple); }
-  .total-card.geral .number { color: var(--text-primary); }
-
-  /* Section */
-  .section {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-  .section-title {
-    font-size: 1.1em;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .section-title .icon { font-size: 1.2em; }
-  .section.locacao .section-title { color: var(--gold); border-color: var(--gold); }
-  .section.vendas .section-title { color: var(--blue); border-color: var(--blue); }
-  .section.admin .section-title { color: var(--purple); border-color: var(--purple); }
-  .section.comparativo .section-title { color: var(--green); border-color: var(--green); }
-
-  /* Bar chart */
-  .bar-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    gap: 10px;
-  }
-  .bar-label {
-    width: 130px;
-    min-width: 130px;
-    font-size: 0.85em;
-    color: var(--text-secondary);
-    text-align: right;
-  }
-  @media (max-width: 500px) {
-    .bar-label { width: 90px; min-width: 90px; font-size: 0.75em; }
-  }
-  .bar-track {
-    flex: 1;
-    background: var(--bg-primary);
-    border-radius: 6px;
-    height: 28px;
-    overflow: hidden;
-    position: relative;
-  }
-  .bar-fill {
-    height: 100%;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 0 8px;
-    min-width: 40px;
-    transition: width 0.6s ease;
-  }
-  .bar-value {
-    font-size: 0.75em;
-    font-weight: 600;
-    color: #fff;
-    white-space: nowrap;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  }
-  .bar-delta {
-    width: 60px;
-    min-width: 60px;
-    text-align: right;
-    font-size: 0.8em;
-    font-weight: 600;
-  }
-
-  /* Arrows */
-  .arrow.up { color: var(--green); }
-  .arrow.down { color: var(--red); }
-  .arrow.same { color: var(--gray); }
-
-  /* Admin rows */
-  .admin-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .admin-row:last-child { border-bottom: none; }
-  .admin-label { color: var(--text-secondary); }
-  .admin-value { font-weight: 700; color: var(--purple); }
-
-  /* Comparativo */
-  .comp-grid {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 12px;
-    align-items: center;
-    text-align: center;
-    padding: 16px 0;
-  }
-  .comp-box {
-    background: var(--bg-card);
-    border-radius: 8px;
-    padding: 16px;
-  }
-  .comp-box .label {
-    font-size: 0.75em;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-  }
-  .comp-box .value {
-    font-size: 1.8em;
-    font-weight: 800;
-  }
-  .comp-vs {
-    font-size: 0.85em;
-    color: var(--text-secondary);
-  }
-  .comp-delta {
-    font-size: 1.2em;
-    font-weight: 700;
-    margin-top: 8px;
-  }
-  .comp-delta.up { color: var(--green); }
-  .comp-delta.down { color: var(--red); }
-  .comp-delta.same { color: var(--gray); }
-
-  /* No data */
-  .no-data {
-    color: var(--text-secondary);
-    font-style: italic;
-    padding: 16px;
-    text-align: center;
-  }
-
-  /* Footer */
-  .footer {
-    text-align: center;
-    padding: 16px;
-    color: var(--text-secondary);
-    font-size: 0.75em;
-    border-top: 1px solid var(--border);
-    margin-top: 24px;
-  }
+:root {
+  --red: #E8192C;
+  --red-light: #FFF1F2;
+  --ink: #1A1A1A;
+  --ink2: #444;
+  --ink3: #777;
+  --bone: #FAF9F7;
+  --card: #FFFFFF;
+  --rule: #ECEAE6;
+  --green: #15803D;
+  --green-bg: #F0FDF4;
+  --amber: #B45309;
+  --amber-bg: #FFFBEB;
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+html { font-size:17px; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bone);
+  color:var(--ink);
+  max-width:780px;
+  margin:0 auto;
+  padding:20px 16px 40px;
+  -webkit-font-smoothing:antialiased;
+}
+header {
+  background:var(--red);
+  color:#fff;
+  border-radius:14px;
+  padding:32px 28px;
+  margin-bottom:28px;
+  text-align:center;
+}
+header h1 { font-size:1.5rem; font-weight:900; letter-spacing:4px; text-transform:uppercase; }
+header p { opacity:.8; font-size:.82rem; margin-top:2px; }
+header .dia {
+  display:inline-block; margin-top:14px;
+  background:rgba(0,0,0,.15); padding:8px 24px;
+  border-radius:40px; font-weight:700; font-size:1.05rem;
+}
+.scores { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:26px; }
+.sc {
+  background:var(--card); border:1px solid var(--rule);
+  border-radius:12px; padding:20px 12px; text-align:center;
+}
+.sc em { font-style:normal; font-size:1.6rem; display:block; margin-bottom:4px; }
+.sc strong { display:block; font-size:2.6rem; font-weight:900; line-height:1; letter-spacing:-1px; }
+.sc span { display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--ink3); margin-top:6px; font-weight:600; }
+.sc.hero { background:var(--red); border-color:var(--red); color:#fff; }
+.sc.hero span { color:rgba(255,255,255,.7); }
+section {
+  background:var(--card); border:1px solid var(--rule);
+  border-radius:12px; padding:24px; margin-bottom:18px;
+}
+section h2 {
+  font-size:1rem; font-weight:700; color:var(--ink);
+  display:flex; align-items:center; gap:8px;
+  padding-bottom:14px; border-bottom:2px solid var(--rule); margin-bottom:18px;
+}
+h2 .tag { font-size:.75rem; font-weight:700; padding:3px 12px; border-radius:20px; color:#fff; }
+h2 .tag.r { background:var(--red); }
+h2 .tag.g { background:var(--green); }
+h2 .tag.a { background:var(--amber); }
+table { width:100%; border-collapse:collapse; }
+td { padding:7px 0; vertical-align:middle; }
+td.or { width:140px; font-size:.88rem; font-weight:600; color:var(--ink2); text-align:right; padding-right:14px; }
+td.br { width:auto; }
+.track { height:32px; background:var(--rule); border-radius:6px; overflow:hidden; }
+.fill { height:100%; border-radius:6px; background:var(--red); transition:width .5s ease; }
+section.vendas .fill { background:var(--green); }
+section.admin .fill { background:var(--amber); }
+td.vl { width:36px; text-align:center; font-size:1.3rem; font-weight:800; color:var(--ink); padding-left:12px; }
+td.pc { width:52px; text-align:right; font-size:.82rem; color:var(--ink3); font-weight:500; }
+.note { margin-top:16px; padding:14px 18px; border-radius:8px; font-size:.88rem; line-height:1.6; color:var(--ink2); }
+.note.r { background:var(--red-light); border-left:3px solid var(--red); }
+.note.g { background:var(--green-bg); border-left:3px solid var(--green); }
+.note.a { background:var(--amber-bg); border-left:3px solid var(--amber); }
+.note b { color:var(--ink); }
+.cmp { list-style:none; }
+.cmp li { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid var(--rule); font-size:.95rem; }
+.cmp li:last-child { border:0; }
+.cmp .lbl { font-weight:600; }
+.cmp .nums { display:flex; align-items:center; gap:14px; }
+.cmp .prev { color:var(--ink3); text-decoration:line-through; font-size:1.1rem; }
+.cmp .now { font-weight:800; font-size:1.4rem; }
+.up { color:var(--green); font-weight:700; font-size:.9rem; }
+.dn { color:#DC2626; font-weight:700; font-size:.9rem; }
+footer { text-align:center; padding:24px 0 0; font-size:.72rem; color:var(--ink3); line-height:1.7; }
+footer b { color:var(--red); }
+@media(max-width:600px) {
+  html { font-size:15px; }
+  .scores { grid-template-columns:repeat(2,1fr); }
+  td.or { width:90px; font-size:.78rem; padding-right:8px; }
+  .sc strong { font-size:2rem; }
+}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="logo">✦ Julio Imóveis</div>
-  <div class="subtitle">Relatório Diário de Atendimentos</div>
-  <div class="date">06/10/2026</div>
-  <div class="day">Terça</div>
+<header>
+  <h1>Julio Imóveis</h1>
+  <p>Relatório Diário de Atendimentos</p>
+  <div class="dia">Terça-feira, 06 de Outubro</div>
+</header>
+
+<div class="scores">
+  <div class="sc"><em>🏠</em><strong>38</strong><span>Locação</span></div>
+  <div class="sc"><em>🔑</em><strong style="color:var(--green)">4</strong><span>Vendas</span></div>
+  <div class="sc"><em>📞</em><strong style="color:var(--amber)">14</strong><span>Admin</span></div>
+  <div class="sc hero"><em>📊</em><strong>56</strong><span>Total do dia</span></div>
 </div>
 
-<!-- TOTALS -->
-<div class="totals">
-  <div class="total-card locacao">
-    <div class="label">Locação</div>
-    <div class="number">38</div>
+<section>
+  <h2>🏠 Locação <span class="tag r">38</span></h2>
+  <table><tr>
+<td class="or">Google</td>
+<td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td>
+<td class="vl">12</td>
+<td class="pc">31.6%</td>
+</tr><tr>
+<td class="or">H-TALKS Leads</td>
+<td class="br"><div class="track"><div class="fill" style="width:83%"></div></div></td>
+<td class="vl">10</td>
+<td class="pc">26.3%</td>
+</tr><tr>
+<td class="or">Chaves na Mão</td>
+<td class="br"><div class="track"><div class="fill" style="width:58%"></div></div></td>
+<td class="vl">7</td>
+<td class="pc">18.4%</td>
+</tr><tr>
+<td class="or">Grupo OLX</td>
+<td class="br"><div class="track"><div class="fill" style="width:42%"></div></div></td>
+<td class="vl">5</td>
+<td class="pc">13.2%</td>
+</tr><tr>
+<td class="or">Outros</td>
+<td class="br"><div class="track"><div class="fill" style="width:17%"></div></div></td>
+<td class="vl">2</td>
+<td class="pc">5.3%</td>
+</tr><tr>
+<td class="or">Presencial</td>
+<td class="br"><div class="track"><div class="fill" style="width:8%"></div></div></td>
+<td class="vl">1</td>
+<td class="pc">2.6%</td>
+</tr><tr>
+<td class="or">Ligação</td>
+<td class="br"><div class="track"><div class="fill" style="width:8%"></div></div></td>
+<td class="vl">1</td>
+<td class="pc">2.6%</td>
+</tr></table>
+  <div class="note r">
+    <b>Google</b> lidera com 12 atendimentos (31.6%).
+    Portais (H-TALKS + OLX) somam <b>15</b> (39%).
   </div>
-  <div class="total-card vendas">
-    <div class="label">Vendas</div>
-    <div class="number">4</div>
+</section>
+
+<section class="vendas">
+  <h2>🔑 Vendas <span class="tag g">4</span></h2>
+  <table><tr>
+<td class="or">Google</td>
+<td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td>
+<td class="vl">2</td>
+<td class="pc">50.0%</td>
+</tr><tr>
+<td class="or">WhatsApp</td>
+<td class="br"><div class="track"><div class="fill" style="width:50%"></div></div></td>
+<td class="vl">1</td>
+<td class="pc">25.0%</td>
+</tr><tr>
+<td class="or">Tráfego Tiago</td>
+<td class="br"><div class="track"><div class="fill" style="width:50%"></div></div></td>
+<td class="vl">1</td>
+<td class="pc">25.0%</td>
+</tr></table>
+  <div class="note g">
+    Vendas com 4 atendimentos — volume subindo vs ontem (2).
   </div>
-  <div class="total-card admin">
-    <div class="label">Admin</div>
-    <div class="number">0</div>
+</section>
+
+<section class="admin">
+  <h2>📞 Administrativo <span class="tag a">14</span></h2>
+  <table>
+    <tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:43%"></div></div></td><td class="vl">6</td><td class="pc">42.9%</td></tr>
+    <tr><td class="or">Recepção</td><td class="br"><div class="track"><div class="fill" style="width:57%"></div></div></td><td class="vl">8</td><td class="pc">57.1%</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>📊 Comparação com segunda (05/10)</h2>
+  <ul class="cmp">
+    <li><span class="lbl">🏠 Locação</span><span class="nums"><span class="prev">47</span><span class="now">38</span><span class="dn">-9 (-19%)</span></span></li>
+    <li><span class="lbl">🔑 Vendas</span><span class="nums"><span class="prev">2</span><span class="now">4</span><span class="up">+2 (+100%)</span></span></li>
+  </ul>
+  <div class="note r">
+    Locação caiu vs segunda (normal — segunda acumula fim de semana). Vendas dobraram.
   </div>
-  <div class="total-card geral">
-    <div class="label">Total</div>
-    <div class="number">42</div>
-  </div>
-</div>
+</section>
 
-<!-- LOCAÇÃO -->
-<div class="section locacao">
-  <div class="section-title">
-    <span class="icon">🏠</span> Locação — Origem dos Leads
-  </div>
-  
-        <div class="bar-row">
-            <div class="bar-label">Google</div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:100.0%;background:#d4a645;">
-                    <span class="bar-value">12 (31.6%)</span>
-                </div>
-            </div>
-            <div class="bar-delta"><span class="arrow up">▲ +3</span></div>
-        </div>
-
-        <div class="bar-row">
-            <div class="bar-label">H-TALKS Leads</div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:83.2%;background:#d4a645;">
-                    <span class="bar-value">10 (26.3%)</span>
-                </div>
-            </div>
-            <div class="bar-delta"><span class="arrow down">▼ -4</span></div>
-        </div>
-
-        <div class="bar-row">
-            <div class="bar-label">Chaves na Mão</div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:58.2%;background:#d4a645;">
-                    <span class="bar-value">7 (18.4%)</span>
-                </div>
-            </div>
-            <div class="bar-delta"><span class="arrow up">▲ +3</span></div>
-        </div>
-
-        <div class="bar-row">
-            <div class="bar-label">Grupo ZAP</div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:41.8%;background:#d4a645;">
-                    <span class="bar-value">5 (13.2%)</span>
-                </div>
-            </div>
-            <div class="bar-delta"><span class="arrow down">▼ -4</span></div>
-        </div>
-
-        <div class="bar-row">
-            <div class="bar-label">-</div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:16.8%;background:#d4a645;">
-                    <span class="bar-value">2 (5.3%)</span>
-                </div>
-            </div>
-            <div class="bar-delta"><span class="arrow up">▲ +1</span></div>
-        </div>
-
-        <div class="bar-row">
-            <div class="bar-label">Presencial</div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:8.2%;background:#d4a645;">
-                    <span class="bar-value">1 (2.6%)</span>
-                </div>
-            </div>
-            <div class="bar-delta"><span class="arrow up">▲ +1</span></div>
-        </div>
-
-        <div class="bar-row">
-            <div class="bar-label">Ligação</div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:8.2%;background:#d4a645;">
-                    <span class="bar-value">1 (2.6%)</span>
-                </div>
-            </div>
-            <div class="bar-delta"><span class="arrow up">▲ +1</span></div>
-        </div>
-</div>
-
-<!-- VENDAS -->
-<div class="section vendas">
-  <div class="section-title">
-    <span class="icon">🏢</span> Vendas — Origem dos Leads
-  </div>
-  
-        <div class="bar-row">
-            <div class="bar-label">Google</div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:100.0%;background:#4a9fd4;">
-                    <span class="bar-value">2 (50.0%)</span>
-                </div>
-            </div>
-            <div class="bar-delta"><span class="arrow same">► 0</span></div>
-        </div>
-
-        <div class="bar-row">
-            <div class="bar-label">WhatsApp</div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:50.0%;background:#4a9fd4;">
-                    <span class="bar-value">1 (25.0%)</span>
-                </div>
-            </div>
-            <div class="bar-delta"><span class="arrow up">▲ +1</span></div>
-        </div>
-
-        <div class="bar-row">
-            <div class="bar-label">TRAFEGO TIAGO</div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:50.0%;background:#4a9fd4;">
-                    <span class="bar-value">1 (25.0%)</span>
-                </div>
-            </div>
-            <div class="bar-delta"><span class="arrow up">▲ +1</span></div>
-        </div>
-</div>
-
-<!-- ADMINISTRATIVO -->
-<div class="section admin">
-  <div class="section-title">
-    <span class="icon">📋</span> Administrativo
-  </div>
-  <div class="no-data">Dados administrativos não disponíveis (SharePoint pendente)</div>
-</div>
-
-<!-- COMPARATIVO -->
-<div class="section comparativo">
-  <div class="section-title">
-    <span class="icon">📈</span> Comparativo — Dia Anterior
-  </div>
-  <div class="comp-grid">
-    <div class="comp-box">
-      <div class="label">Ontem</div>
-      <div class="value">39</div>
-    </div>
-    <div class="comp-vs">vs</div>
-    <div class="comp-box">
-      <div class="label">Hoje</div>
-      <div class="value">42</div>
-    </div>
-  </div>
-  <div style="text-align:center;">
-    <div class="comp-delta up">▲ +3</div>
-  </div>
-</div>
-
-<!-- FOOTER -->
-<div class="footer">
-  Gerado automaticamente pelo Big Julio às 07:37 · Julio Imóveis © 2026
-</div>
+<footer>
+  Gerado por <b>Big Julio</b> · 07/10/2026 11:05<br>
+  Fonte: CRM ImóvelOffice · Filtro por recepção 06/10<br>
+  <b>Julio Imóveis</b> — Brusque, SC
+</footer>
 
 </body>
 </html>
