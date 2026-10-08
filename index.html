@@ -35,14 +35,8 @@ td.or { width:140px; font-size:.88rem; font-weight:600; color:var(--ink2); text-
 .track { height:32px; background:var(--rule); border-radius:6px; overflow:hidden; }
 .fill { height:100%; border-radius:6px; background:var(--red); }
 section.vendas .fill { background:var(--green); }
-section.admin .fill { background:var(--amber); }
 td.vl { width:36px; text-align:center; font-size:1.3rem; font-weight:800; padding-left:12px; }
 td.pc { width:52px; text-align:right; font-size:.82rem; color:var(--ink3); }
-.note { margin-top:16px; padding:14px 18px; border-radius:8px; font-size:.88rem; line-height:1.6; color:var(--ink2); }
-.note.r { background:var(--red-light); border-left:3px solid var(--red); }
-.note.g { background:var(--green-bg); border-left:3px solid var(--green); }
-.note.a { background:var(--amber-bg); border-left:3px solid var(--amber); }
-.note b { color:var(--ink); }
 .cmp { list-style:none; }
 .cmp li { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid var(--rule); font-size:.95rem; }
 .cmp li:last-child { border:0; }
@@ -91,13 +85,44 @@ footer b { color:var(--red); }
 <tr><td class="or">Site Julio</td><td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td><td class="vl">1</td><td class="pc">9.1%</td></tr>
 </table>
 </section>
-<section class="admin">
+<section>
   <h2>📞 Administrativo <span class="tag a">17</span></h2>
-  <table>
-    <tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:42%"></div></div></td><td class="vl">5</td><td class="pc">29.4%</td></tr>
-    <tr><td class="or">Presencial</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">12</td><td class="pc">70.6%</td></tr>
-  </table>
-  <div class="note a">Dados da planilha de recepção (SharePoint). ADM Locação + ADM Vendas + FEX Seguros.</div>
+  <table style="width:100%;border-collapse:collapse;margin-top:8px;">
+<thead>
+<tr style="border-bottom:2px solid var(--rule);">
+  <td style="padding:8px 0;font-size:.85rem;font-weight:700;color:var(--ink2);">Área</td>
+  <td style="padding:8px 12px;font-size:.85rem;font-weight:700;color:var(--ink2);text-align:center;">Ligação</td>
+  <td style="padding:8px 12px;font-size:.85rem;font-weight:700;color:var(--ink2);text-align:center;">Recepção</td>
+  <td style="padding:8px 12px;font-size:.85rem;font-weight:700;color:var(--ink2);text-align:center;">Total</td>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--rule);">
+  <td style="padding:10px 0;font-size:.9rem;font-weight:600;color:var(--ink);">Adm. Locação</td>
+  <td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">5</td>
+  <td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">12</td>
+  <td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;color:var(--amber);">17</td>
+</tr>
+<tr style="border-bottom:1px solid var(--rule);">
+  <td style="padding:10px 0;font-size:.9rem;font-weight:600;color:var(--ink);">Adm. Vendas</td>
+  <td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">0</td>
+  <td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">0</td>
+  <td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;color:var(--amber);">0</td>
+</tr>
+<tr style="border-bottom:1px solid var(--rule);">
+  <td style="padding:10px 0;font-size:.9rem;font-weight:600;color:var(--ink);">Adm. FEX Seguros</td>
+  <td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">0</td>
+  <td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">0</td>
+  <td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;color:var(--amber);">0</td>
+</tr>
+<tr style="background:var(--amber-bg);border-radius:6px;">
+  <td style="padding:12px 0;font-size:.95rem;font-weight:800;color:var(--amber);">TOTAL</td>
+  <td style="padding:12px 12px;font-size:1.3rem;font-weight:900;text-align:center;color:var(--amber);">5</td>
+  <td style="padding:12px 12px;font-size:1.3rem;font-weight:900;text-align:center;color:var(--amber);">12</td>
+  <td style="padding:12px 12px;font-size:1.3rem;font-weight:900;text-align:center;color:var(--amber);">17</td>
+</tr>
+</tbody>
+</table>
 </section>
 <section>
   <h2>📊 Comparação com terça-feira (06/10/2026)</h2>
@@ -107,8 +132,8 @@ footer b { color:var(--red); }
   </ul>
 </section>
 <footer>
-  Gerado por <b>Big Julio</b> · 08/10/2026 17:03<br>
-  Fonte: CRM ImóvelOffice (cadastro + horário, regra 18h) + Planilha Recepção (SharePoint)<br>
+  Gerado por <b>Big Julio</b> · 08/10/2026 17:08<br>
+  Fonte: CRM ImóvelOffice + Planilha Recepção (SharePoint)<br>
   Regra Jéssica: 1 cliente = 1 atendimento, filtro corretor, ordem fixa<br>
   <b>Julio Imóveis</b> — Brusque, SC
 </footer>
