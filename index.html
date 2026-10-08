@@ -3,195 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atendimentos do Dia — Julio Imóveis</title>
+<title>Julio Imóveis — Relatório Diário</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --red: #E8192C; --red-light: #FFF1F2;
-  --ink: #1A1A1A; --ink2: #444; --ink3: #777;
-  --bone: #FAF9F7; --card: #FFFFFF; --rule: #ECEAE6;
-  --green: #15803D; --green-bg: #F0FDF4;
-  --amber: #B45309; --amber-bg: #FFFBEB;
-}
-*{ margin:0; padding:0; box-sizing:border-box; }
-html { font-size:17px; }
-body {
-  font-family:'Inter',system-ui,sans-serif; background:var(--bone);
-  color:var(--ink); max-width:780px; margin:0 auto; padding:20px 16px 40px;
-  -webkit-font-smoothing:antialiased;
-}
-header {
-  background:var(--red); color:#fff; border-radius:14px;
-  padding:32px 28px; margin-bottom:28px; text-align:center;
-}
-header h1 { font-size:1.5rem; font-weight:900; letter-spacing:4px; text-transform:uppercase; }
-header p { opacity:.8; font-size:.82rem; margin-top:2px; }
-header .dia {
-  display:inline-block; margin-top:14px; background:rgba(0,0,0,.15);
-  padding:8px 24px; border-radius:40px; font-weight:700; font-size:1.05rem;
-}
-.scores { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:26px; }
-.sc {
-  background:var(--card); border:1px solid var(--rule);
-  border-radius:12px; padding:20px 12px; text-align:center;
-}
-.sc em { font-style:normal; font-size:1.6rem; display:block; margin-bottom:4px; }
-.sc strong { display:block; font-size:2.6rem; font-weight:900; line-height:1; letter-spacing:-1px; }
-.sc span { display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--ink3); margin-top:6px; font-weight:600; }
-.sc.hero { background:var(--red); border-color:var(--red); color:#fff; }
-.sc.hero span { color:rgba(255,255,255,.7); }
-section {
-  background:var(--card); border:1px solid var(--rule);
-  border-radius:12px; padding:24px; margin-bottom:18px;
-}
-section h2 {
-  font-size:1rem; font-weight:700; display:flex; align-items:center; gap:8px;
-  padding-bottom:14px; border-bottom:2px solid var(--rule); margin-bottom:18px;
-}
-h2 .tag { font-size:.75rem; font-weight:700; padding:3px 12px; border-radius:20px; color:#fff; }
-h2 .tag.r { background:var(--red); } h2 .tag.g { background:var(--green); } h2 .tag.a { background:var(--amber); }
-table { width:100%; border-collapse:collapse; }
-td { padding:7px 0; vertical-align:middle; }
-td.or { width:140px; font-size:.88rem; font-weight:600; color:var(--ink2); text-align:right; padding-right:14px; }
-.track { height:32px; background:var(--rule); border-radius:6px; overflow:hidden; }
-.fill { height:100%; border-radius:6px; background:var(--red); }
-section.vendas .fill { background:var(--green); }
-section.admin .fill { background:var(--amber); }
-td.vl { width:36px; text-align:center; font-size:1.3rem; font-weight:800; padding-left:12px; }
-td.pc { width:52px; text-align:right; font-size:.82rem; color:var(--ink3); }
-.note { margin-top:16px; padding:14px 18px; border-radius:8px; font-size:.88rem; line-height:1.6; color:var(--ink2); }
-.note.r { background:var(--red-light); border-left:3px solid var(--red); }
-.note.g { background:var(--green-bg); border-left:3px solid var(--green); }
-.note.a { background:var(--amber-bg); border-left:3px solid var(--amber); }
-.note b { color:var(--ink); }
-.cmp { list-style:none; }
-.cmp li { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid var(--rule); font-size:.95rem; }
-.cmp li:last-child { border:0; }
-.cmp .lbl { font-weight:600; } .cmp .nums { display:flex; align-items:center; gap:14px; }
-.cmp .prev { color:var(--ink3); text-decoration:line-through; font-size:1.1rem; }
-.cmp .now { font-weight:800; font-size:1.4rem; }
-.up { color:var(--green); font-weight:700; font-size:.9rem; }
-.dn { color:#DC2626; font-weight:700; font-size:.9rem; }
-footer { text-align:center; padding:24px 0 0; font-size:.72rem; color:var(--ink3); line-height:1.7; }
-footer b { color:var(--red); }
-@media(max-width:600px) {
-  html { font-size:15px; } .scores { grid-template-columns:repeat(2,1fr); }
-  td.or { width:90px; font-size:.78rem; } .sc strong { font-size:2rem; }
-}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',system-ui,sans-serif; background:#FAF9F7; color:#1a1a1a; }
+.header { background:#E8192C; color:#fff; padding:24px 20px 18px; text-align:center; }
+.header h1 { font-size:22px; font-weight:800; letter-spacing:-0.5px; }
+.header .date { font-size:14px; opacity:0.9; margin-top:4px; }
+.header .period { font-size:12px; opacity:0.7; margin-top:2px; }
+.container { max-width:640px; margin:0 auto; padding:16px; }
+.card { background:#fff; border-radius:12px; padding:20px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+.card-title { font-size:13px; font-weight:700; color:#E8192C; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+.big-number { font-size:48px; font-weight:800; color:#1a1a1a; line-height:1; }
+.compare { font-size:14px; margin-top:4px; }
+.stats-row { display:flex; gap:12px; margin-bottom:16px; }
+.stat-box { flex:1; background:#fff; border-radius:12px; padding:16px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+.stat-box .label { font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px; }
+.stat-box .value { font-size:28px; font-weight:800; color:#1a1a1a; margin-top:4px; }
+.stat-box .var { font-size:12px; margin-top:2px; }
+.footer { text-align:center; padding:20px; font-size:11px; color:#aaa; }
+.admin-note { background:#FFF3CD; border:1px solid #FFE69C; border-radius:8px; padding:12px 16px; font-size:13px; color:#664D03; margin-bottom:16px; }
 </style>
 </head>
 <body>
-
-<header>
-  <h1>Julio Imóveis</h1>
-  <p>Relatório Diário de Atendimentos</p>
-  <div class="dia">Terça-feira, 06 de Outubro</div>
-</header>
-
-<div class="scores">
-  <div class="sc"><em>🏠</em><strong>40</strong><span>Locação</span></div>
-  <div class="sc"><em>🔑</em><strong style="color:var(--green)">8</strong><span>Vendas</span></div>
-  <div class="sc"><em>📞</em><strong style="color:var(--amber)">20</strong><span>Admin</span></div>
-  <div class="sc hero"><em>📊</em><strong>68</strong><span>Total do dia</span></div>
+<div class="header">
+    <h1>📊 Julio Imóveis</h1>
+    <div class="date">Relatório de Atendimentos — Quarta-feira, 07/10/2026</div>
+    <div class="period">Período: 06/10 18:00 → 07/10 17:59</div>
 </div>
+<div class="container">
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="label">Total CRM</div>
+            <div class="value">22</div>
+            <div class="var"><span style="color:#E8192C">▼ -26</span></div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Locação</div>
+            <div class="value" style="color:#E8192C">16</div>
+            <div class="var"><span style="color:#E8192C">▼ -24</span></div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Vendas</div>
+            <div class="value" style="color:#c41722">6</div>
+            <div class="var"><span style="color:#E8192C">▼ -2</span></div>
+        </div>
+    </div>
 
-<section>
-  <h2>🏠 Locação <span class="tag r">40</span></h2>
-  <table><tr>
-<td class="or">Google</td>
-<td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td>
-<td class="vl">10</td>
-<td class="pc">25.0%</td>
-</tr><tr>
-<td class="or">WhatsApp</td>
-<td class="br"><div class="track"><div class="fill" style="width:90%"></div></div></td>
-<td class="vl">9</td>
-<td class="pc">22.5%</td>
-</tr><tr>
-<td class="or">Grupo OLX</td>
-<td class="br"><div class="track"><div class="fill" style="width:90%"></div></div></td>
-<td class="vl">9</td>
-<td class="pc">22.5%</td>
-</tr><tr>
-<td class="or">Chaves na Mão</td>
-<td class="br"><div class="track"><div class="fill" style="width:70%"></div></div></td>
-<td class="vl">7</td>
-<td class="pc">17.5%</td>
-</tr><tr>
-<td class="or">Site Julio</td>
-<td class="br"><div class="track"><div class="fill" style="width:30%"></div></div></td>
-<td class="vl">3</td>
-<td class="pc">7.5%</td>
-</tr><tr>
-<td class="or">Presencial</td>
-<td class="br"><div class="track"><div class="fill" style="width:10%"></div></div></td>
-<td class="vl">1</td>
-<td class="pc">2.5%</td>
-</tr><tr>
-<td class="or">Ligação</td>
-<td class="br"><div class="track"><div class="fill" style="width:10%"></div></div></td>
-<td class="vl">1</td>
-<td class="pc">2.5%</td>
-</tr></table>
-  <div class="note r">
-    <b>WhatsApp</b> lidera com 9 atendimentos (22.5%).
-    <b>Google</b> com 10 (25.0%).
-    <b>Site Julio</b> trouxe 3 diretos.
-  </div>
-</section>
+    <div class="card">
+        <div class="card-title">🏠 Locação — Origens</div>
+        
+        <div style="display:flex;align-items:center;margin:6px 0;gap:10px">
+            <div style="width:120px;font-size:13px;color:#444;text-align:right">WhatsApp</div>
+            <div style="flex:1;background:#eee;border-radius:4px;height:24px;position:relative">
+                <div style="width:100%;background:#E8192C;height:100%;border-radius:4px;min-width:2px"></div>
+            </div>
+            <div style="width:60px;font-size:14px;font-weight:600;color:#333">6 <span style="font-size:11px;color:#888">(38%)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;margin:6px 0;gap:10px">
+            <div style="width:120px;font-size:13px;color:#444;text-align:right">Grupo OLX</div>
+            <div style="flex:1;background:#eee;border-radius:4px;height:24px;position:relative">
+                <div style="width:67%;background:#E8192C;height:100%;border-radius:4px;min-width:2px"></div>
+            </div>
+            <div style="width:60px;font-size:14px;font-weight:600;color:#333">4 <span style="font-size:11px;color:#888">(25%)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;margin:6px 0;gap:10px">
+            <div style="width:120px;font-size:13px;color:#444;text-align:right">Chaves na Mão</div>
+            <div style="flex:1;background:#eee;border-radius:4px;height:24px;position:relative">
+                <div style="width:67%;background:#E8192C;height:100%;border-radius:4px;min-width:2px"></div>
+            </div>
+            <div style="width:60px;font-size:14px;font-weight:600;color:#333">4 <span style="font-size:11px;color:#888">(25%)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;margin:6px 0;gap:10px">
+            <div style="width:120px;font-size:13px;color:#444;text-align:right">Presencial</div>
+            <div style="flex:1;background:#eee;border-radius:4px;height:24px;position:relative">
+                <div style="width:17%;background:#E8192C;height:100%;border-radius:4px;min-width:2px"></div>
+            </div>
+            <div style="width:60px;font-size:14px;font-weight:600;color:#333">1 <span style="font-size:11px;color:#888">(6%)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;margin:6px 0;gap:10px">
+            <div style="width:120px;font-size:13px;color:#444;text-align:right">Site Julio</div>
+            <div style="flex:1;background:#eee;border-radius:4px;height:24px;position:relative">
+                <div style="width:17%;background:#E8192C;height:100%;border-radius:4px;min-width:2px"></div>
+            </div>
+            <div style="width:60px;font-size:14px;font-weight:600;color:#333">1 <span style="font-size:11px;color:#888">(6%)</span></div>
+        </div>
+    </div>
 
-<section class="vendas">
-  <h2>🔑 Vendas <span class="tag g">8</span></h2>
-  <table><tr>
-<td class="or">Google</td>
-<td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td>
-<td class="vl">3</td>
-<td class="pc">37.5%</td>
-</tr><tr>
-<td class="or">Tráfego Tiago</td>
-<td class="br"><div class="track"><div class="fill" style="width:67%"></div></div></td>
-<td class="vl">2</td>
-<td class="pc">25.0%</td>
-</tr><tr>
-<td class="or">Grupo OLX</td>
-<td class="br"><div class="track"><div class="fill" style="width:67%"></div></div></td>
-<td class="vl">2</td>
-<td class="pc">25.0%</td>
-</tr><tr>
-<td class="or">WhatsApp</td>
-<td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td>
-<td class="vl">1</td>
-<td class="pc">12.5%</td>
-</tr></table>
-</section>
+    <div class="card">
+        <div class="card-title">🏢 Vendas — Origens</div>
+        
+        <div style="display:flex;align-items:center;margin:6px 0;gap:10px">
+            <div style="width:120px;font-size:13px;color:#444;text-align:right">WhatsApp</div>
+            <div style="flex:1;background:#eee;border-radius:4px;height:24px;position:relative">
+                <div style="width:100%;background:#c41722;height:100%;border-radius:4px;min-width:2px"></div>
+            </div>
+            <div style="width:60px;font-size:14px;font-weight:600;color:#333">2 <span style="font-size:11px;color:#888">(33%)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;margin:6px 0;gap:10px">
+            <div style="width:120px;font-size:13px;color:#444;text-align:right">Ligação</div>
+            <div style="flex:1;background:#eee;border-radius:4px;height:24px;position:relative">
+                <div style="width:100%;background:#c41722;height:100%;border-radius:4px;min-width:2px"></div>
+            </div>
+            <div style="width:60px;font-size:14px;font-weight:600;color:#333">2 <span style="font-size:11px;color:#888">(33%)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;margin:6px 0;gap:10px">
+            <div style="width:120px;font-size:13px;color:#444;text-align:right">Site Julio</div>
+            <div style="flex:1;background:#eee;border-radius:4px;height:24px;position:relative">
+                <div style="width:50%;background:#c41722;height:100%;border-radius:4px;min-width:2px"></div>
+            </div>
+            <div style="width:60px;font-size:14px;font-weight:600;color:#333">1 <span style="font-size:11px;color:#888">(17%)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;margin:6px 0;gap:10px">
+            <div style="width:120px;font-size:13px;color:#444;text-align:right">Chaves na Mão</div>
+            <div style="flex:1;background:#eee;border-radius:4px;height:24px;position:relative">
+                <div style="width:50%;background:#c41722;height:100%;border-radius:4px;min-width:2px"></div>
+            </div>
+            <div style="width:60px;font-size:14px;font-weight:600;color:#333">1 <span style="font-size:11px;color:#888">(17%)</span></div>
+        </div>
+    </div>
 
-<section class="admin">
-  <h2>📞 Administrativo <span class="tag a">20</span></h2>
-  <table>
-    <tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:15%"></div></div></td><td class="vl">3</td><td class="pc">15.0%</td></tr>
-    <tr><td class="or">Recepção</td><td class="br"><div class="track"><div class="fill" style="width:85%"></div></div></td><td class="vl">17</td><td class="pc">85.0%</td></tr>
-  </table>
-  <div class="note a">Dados da planilha de recepção (SharePoint) — apenas ADM Locação + ADM Vendas + FEX Seguros.</div>
-</section>
+    <div class="admin-note">
+        ⚠️ <strong>Administrativo:</strong> Dados indisponíveis — planilha SharePoint não acessível via API nesta execução. Acesso será revisado.
+    </div>
 
-<section>
-  <h2>📊 Comparação com segunda (05/10)</h2>
-  <ul class="cmp">
-    <li><span class="lbl">🏠 Locação</span><span class="nums"><span class="prev">67</span><span class="now">40</span><span class="dn">-27 (-40%)</span></span></li>
-    <li><span class="lbl">🔑 Vendas</span><span class="nums"><span class="prev">10</span><span class="now">8</span><span class="dn">-2 (-20%)</span></span></li>
-  </ul>
-  <div class="note r">
-    Terça com queda natural vs segunda (segunda acumula fim de semana). Locação -40%, vendas -20%.
-  </div>
-</section>
+    <div class="card">
+        <div class="card-title">📈 Comparativo com dia anterior (06/10/2026)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-top:8px">
+            <div>
+                <div style="font-size:11px;color:#888">LOCAÇÃO</div>
+                <div style="font-size:18px;font-weight:700">40 → 16</div>
+                <div style="font-size:13px"><span style="color:#E8192C">▼ -24</span></div>
+            </div>
+            <div>
+                <div style="font-size:11px;color:#888">VENDAS</div>
+                <div style="font-size:18px;font-weight:700">8 → 6</div>
+                <div style="font-size:13px"><span style="color:#E8192C">▼ -2</span></div>
+            </div>
+            <div>
+                <div style="font-size:11px;color:#888">TOTAL</div>
+                <div style="font-size:18px;font-weight:700">48 → 22</div>
+                <div style="font-size:13px"><span style="color:#E8192C">▼ -26</span></div>
+            </div>
+        </div>
+    </div>
 
-<footer>
-  Gerado por <b>Big Julio</b> · 07/10/2026 13:35<br>
-  Fonte: CRM ImóvelOffice (cadastro + horário) + Planilha Recepção (SharePoint)<br>
-  Regra: cadastrados entre 05/10 18h e 06/10 18h + finalizados do período<br>
-  <b>Julio Imóveis</b> — Brusque, SC
-</footer>
-
+    <div class="footer">
+        Gerado por Big Julio 🤖 · 08/10/2026 07:49 UTC<br>
+        Fonte: CRM ImóvelOffice · Regra Jéssica (18h-18h)
+    </div>
+</div>
 </body>
 </html>
