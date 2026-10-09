@@ -53,6 +53,11 @@ td.pc { width:52px; text-align:right; font-size:.82rem; color:var(--ink3); }
 .dn { color:#DC2626; font-weight:700; font-size:.9rem; }
 footer { text-align:center; padding:24px 0 0; font-size:.72rem; color:var(--ink3); line-height:1.7; }
 footer b { color:var(--red); }
+.admin-detail { margin-top:12px; }
+.admin-detail table { width:100%; }
+.admin-detail th { text-align:left; font-size:.82rem; font-weight:700; color:var(--ink3); padding:8px 0; text-transform:uppercase; letter-spacing:.5px; }
+.admin-detail td { padding:6px 0; font-size:.9rem; border-bottom:1px solid var(--rule); }
+.admin-detail tr:last-child td { border-bottom:2px solid var(--ink); font-weight:800; }
 @media(max-width:600px) { html { font-size:15px; } .scores { grid-template-columns:repeat(2,1fr); }
   td.or { width:90px; font-size:.78rem; } .sc strong { font-size:2rem; } }
 </style>
@@ -71,25 +76,30 @@ footer b { color:var(--red); }
 </div>
 <section>
   <h2>🏠 Locação <span class="tag r">5</span></h2>
-  <table><tr><td class="or">Grupo OLX</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">3</td><td class="pc">60.0%</td></tr>
-<tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td><td class="vl">1</td><td class="pc">20.0%</td></tr>
+  <table><tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td><td class="vl">1</td><td class="pc">20.0%</td></tr>
 <tr><td class="or">WhatsApp</td><td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td><td class="vl">1</td><td class="pc">20.0%</td></tr>
+<tr><td class="or">Grupo OLX</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">3</td><td class="pc">60.0%</td></tr>
 </table>
-  <div class="note r"><b>Grupo OLX</b> lidera com 3 atendimentos (60.0%).</div>
+  <div class="note r"><b>Grupo OLX</b> lidera com 3 atendimento(s) (60.0%).</div>
 </section>
 <section class="vendas">
   <h2>🔑 Vendas <span class="tag g">5</span></h2>
-  <table><tr><td class="or">Tráfego Tiago</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">3</td><td class="pc">60.0%</td></tr>
-<tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td><td class="vl">1</td><td class="pc">20.0%</td></tr>
+  <table><tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td><td class="vl">1</td><td class="pc">20.0%</td></tr>
 <tr><td class="or">Chaves na Mão</td><td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td><td class="vl">1</td><td class="pc">20.0%</td></tr>
+<tr><td class="or">Tráfego Tiago</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">3</td><td class="pc">60.0%</td></tr>
 </table>
 </section>
 <section class="admin">
   <h2>📞 Administrativo <span class="tag a">25</span></h2>
-  <table>
-    <tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:92%"></div></div></td><td class="vl">12</td><td class="pc">48.0%</td></tr>
-    <tr><td class="or">Presencial</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">13</td><td class="pc">52.0%</td></tr>
-  </table>
+  <div class="admin-detail">
+    <table>
+      <tr><th>Área</th><th style="text-align:center">Ligação</th><th style="text-align:center">Recepção</th><th style="text-align:center">Total</th></tr>
+      <tr><td>Adm. Locação</td><td style="text-align:center">12</td><td style="text-align:center">12</td><td style="text-align:center">24</td></tr>
+      <tr><td>Adm. Vendas</td><td style="text-align:center">0</td><td style="text-align:center">1</td><td style="text-align:center">1</td></tr>
+      <tr><td>FEX Seguros</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td></tr>
+      <tr><td>TOTAL</td><td style="text-align:center">12</td><td style="text-align:center">13</td><td style="text-align:center">25</td></tr>
+    </table>
+  </div>
   <div class="note a">Dados da planilha de recepção (SharePoint). ADM Locação + ADM Vendas + FEX Seguros.</div>
 </section>
 <section>
@@ -97,10 +107,12 @@ footer b { color:var(--red); }
   <ul class="cmp">
     <li><span class="lbl">🏠 Locação</span><span class="nums"><span class="prev">33</span><span class="now">5</span><span class="dn">-28 (-85%)</span></span></li>
     <li><span class="lbl">🔑 Vendas</span><span class="nums"><span class="prev">11</span><span class="now">5</span><span class="dn">-6 (-55%)</span></span></li>
+    <li><span class="lbl">📞 Admin</span><span class="nums"><span class="prev">17</span><span class="now">25</span><span class="up">+8 (+47%)</span></span></li>
+    <li><span class="lbl">📊 Total</span><span class="nums"><span class="prev">61</span><span class="now">35</span><span class="dn">-26 (-43%)</span></span></li>
   </ul>
 </section>
 <footer>
-  Gerado por <b>Big Julio</b> · 09/10/2026 07:50<br>
+  Gerado por <b>Big Julio</b> · 09/10/2026 10:50<br>
   Fonte: CRM ImóvelOffice (cadastro + horário) + Planilha Recepção (SharePoint)<br>
   Regra Jéssica: cadastro D-1 18h a D 18h, finalizados incluídos<br>
   <b>Julio Imóveis</b> — Brusque, SC
