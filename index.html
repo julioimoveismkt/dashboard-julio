@@ -35,14 +35,8 @@ td.or { width:140px; font-size:.88rem; font-weight:600; color:var(--ink2); text-
 .track { height:32px; background:var(--rule); border-radius:6px; overflow:hidden; }
 .fill { height:100%; border-radius:6px; background:var(--red); }
 section.vendas .fill { background:var(--green); }
-section.admin .fill { background:var(--amber); }
 td.vl { width:36px; text-align:center; font-size:1.3rem; font-weight:800; padding-left:12px; }
 td.pc { width:52px; text-align:right; font-size:.82rem; color:var(--ink3); }
-.note { margin-top:16px; padding:14px 18px; border-radius:8px; font-size:.88rem; line-height:1.6; color:var(--ink2); }
-.note.r { background:var(--red-light); border-left:3px solid var(--red); }
-.note.g { background:var(--green-bg); border-left:3px solid var(--green); }
-.note.a { background:var(--amber-bg); border-left:3px solid var(--amber); }
-.note b { color:var(--ink); }
 .cmp { list-style:none; }
 .cmp li { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid var(--rule); font-size:.95rem; }
 .cmp li:last-child { border:0; }
@@ -58,51 +52,65 @@ footer b { color:var(--red); }
 </style>
 </head>
 <body>
-<header>
-  <h1>Julio Imóveis</h1>
-  <p>Relatório Diário de Atendimentos</p>
-  <div class="dia">Quinta-feira, 08/10/2026</div>
-</header>
+<header><h1>Julio Imóveis</h1><p>Relatório Diário de Atendimentos</p>
+<div class="dia">Quinta-feira, 08 de Outubro</div></header>
 <div class="scores">
-  <div class="sc"><em>🏠</em><strong>9</strong><span>Locação</span></div>
-  <div class="sc"><em>🔑</em><strong style="color:var(--green)">0</strong><span>Vendas</span></div>
-  <div class="sc"><em>📞</em><strong style="color:var(--amber)">13</strong><span>Admin</span></div>
-  <div class="sc hero"><em>📊</em><strong>22</strong><span>Total do dia</span></div>
+<div class="sc"><em>🏠</em><strong>46</strong><span>Locação</span></div>
+<div class="sc"><em>🔑</em><strong style="color:var(--green)">6</strong><span>Vendas</span></div>
+<div class="sc"><em>📞</em><strong style="color:var(--amber)">27</strong><span>Admin</span></div>
+<div class="sc hero"><em>📊</em><strong>79</strong><span>Total do dia</span></div>
 </div>
-<section>
-  <h2>🏠 Locação <span class="tag r">9</span></h2>
-  <table><tr><td class="or">Grupo OLX</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">4</td><td class="pc">44.4%</td></tr>
-<tr><td class="or">Chaves na Mão</td><td class="br"><div class="track"><div class="fill" style="width:50%"></div></div></td><td class="vl">2</td><td class="pc">22.2%</td></tr>
-<tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:25%"></div></div></td><td class="vl">1</td><td class="pc">11.1%</td></tr>
-<tr><td class="or">WhatsApp</td><td class="br"><div class="track"><div class="fill" style="width:25%"></div></div></td><td class="vl">1</td><td class="pc">11.1%</td></tr>
-<tr><td class="or">Site Julio</td><td class="br"><div class="track"><div class="fill" style="width:25%"></div></div></td><td class="vl">1</td><td class="pc">11.1%</td></tr>
-</table>
-  <div class="note r"><b>Grupo OLX</b> lidera com 4 atendimentos (44.4%).</div>
-</section>
-<section class="vendas">
-  <h2>🔑 Vendas <span class="tag g">0</span></h2>
-  <table></table>
-</section>
-<section class="admin">
-  <h2>📞 Administrativo <span class="tag a">13</span></h2>
-  <table>
-    <tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">13</td><td class="pc">100.0%</td></tr>
-    <tr><td class="or">Presencial</td><td class="br"><div class="track"><div class="fill" style="width:0%"></div></div></td><td class="vl">0</td><td class="pc">0.0%</td></tr>
-  </table>
-  <div class="note a">Dados da planilha de recepção (SharePoint). ADM Locação + ADM Vendas + FEX Seguros.</div>
-</section>
-<section>
-  <h2>📊 Comparação com quinta-feira (08/10/2026)</h2>
-  <ul class="cmp">
-    <li><span class="lbl">🏠 Locação</span><span class="nums"><span class="prev">5</span><span class="now">9</span><span class="up">+4 (+80%)</span></span></li>
-    <li><span class="lbl">🔑 Vendas</span><span class="nums"><span class="prev">5</span><span class="now">0</span><span class="dn">-5 (-100%)</span></span></li>
-  </ul>
-</section>
-<footer>
-  Gerado por <b>Big Julio</b> · 09/10/2026 12:21<br>
-  Fonte: CRM ImóvelOffice (cadastro + horário) + Planilha Recepção (SharePoint)<br>
-  Regra Jéssica: cadastro D-1 18h a D 18h, finalizados incluídos<br>
-  <b>Julio Imóveis</b> — Brusque, SC
-</footer>
-</body>
-</html>
+<section><h2>🏠 Locação <span class="tag r">46</span></h2>
+<table><tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:10%"></div></div></td><td class="vl">2</td><td class="pc">4.3%</td></tr>
+<tr><td class="or">Presencial</td><td class="br"><div class="track"><div class="fill" style="width:5%"></div></div></td><td class="vl">1</td><td class="pc">2.2%</td></tr>
+<tr><td class="or">WhatsApp</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">20</td><td class="pc">43.5%</td></tr>
+<tr><td class="or">Google</td><td class="br"><div class="track"><div class="fill" style="width:50%"></div></div></td><td class="vl">10</td><td class="pc">21.7%</td></tr>
+<tr><td class="or">Chaves na Mão</td><td class="br"><div class="track"><div class="fill" style="width:5%"></div></div></td><td class="vl">1</td><td class="pc">2.2%</td></tr>
+<tr><td class="or">Grupo OLX</td><td class="br"><div class="track"><div class="fill" style="width:50%"></div></div></td><td class="vl">10</td><td class="pc">21.7%</td></tr>
+<tr><td class="or">Site Julio</td><td class="br"><div class="track"><div class="fill" style="width:10%"></div></div></td><td class="vl">2</td><td class="pc">4.3%</td></tr>
+</table></section>
+<section class="vendas"><h2>🔑 Vendas <span class="tag g">6</span></h2>
+<table><tr><td class="or">Ligação</td><td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td><td class="vl">1</td><td class="pc">16.7%</td></tr>
+<tr><td class="or">WhatsApp</td><td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td><td class="vl">1</td><td class="pc">16.7%</td></tr>
+<tr><td class="or">Chaves na Mão</td><td class="br"><div class="track"><div class="fill" style="width:33%"></div></div></td><td class="vl">1</td><td class="pc">16.7%</td></tr>
+<tr><td class="or">Tráfego Tiago</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">3</td><td class="pc">50.0%</td></tr>
+</table></section>
+<section><h2>📞 Administrativo <span class="tag a">27</span></h2>
+<table style="width:100%;border-collapse:collapse;margin-top:8px;">
+<thead><tr style="border-bottom:2px solid var(--rule);">
+<td style="padding:8px 0;font-size:.85rem;font-weight:700;color:var(--ink2);">Área</td>
+<td style="padding:8px 12px;font-size:.85rem;font-weight:700;color:var(--ink2);text-align:center;">Ligação</td>
+<td style="padding:8px 12px;font-size:.85rem;font-weight:700;color:var(--ink2);text-align:center;">Recepção</td>
+<td style="padding:8px 12px;font-size:.85rem;font-weight:700;color:var(--ink2);text-align:center;">Total</td>
+</tr></thead><tbody>
+<tr style="border-bottom:1px solid var(--rule);">
+<td style="padding:10px 0;font-size:.9rem;font-weight:600;">Adm. Locação</td>
+<td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">13</td>
+<td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">13</td>
+<td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;color:var(--amber);">26</td></tr>
+<tr style="border-bottom:1px solid var(--rule);">
+<td style="padding:10px 0;font-size:.9rem;font-weight:600;">Adm. Vendas</td>
+<td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">0</td>
+<td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">1</td>
+<td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;color:var(--amber);">1</td></tr>
+<tr style="border-bottom:1px solid var(--rule);">
+<td style="padding:10px 0;font-size:.9rem;font-weight:600;">Adm. FEX Seguros</td>
+<td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">0</td>
+<td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;">0</td>
+<td style="padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;color:var(--amber);">0</td></tr>
+<tr style="background:var(--amber-bg);">
+<td style="padding:12px 0;font-size:.95rem;font-weight:800;color:var(--amber);">TOTAL</td>
+<td style="padding:12px 12px;font-size:1.3rem;font-weight:900;text-align:center;color:var(--amber);">13</td>
+<td style="padding:12px 12px;font-size:1.3rem;font-weight:900;text-align:center;color:var(--amber);">14</td>
+<td style="padding:12px 12px;font-size:1.3rem;font-weight:900;text-align:center;color:var(--amber);">27</td></tr>
+</tbody></table></section>
+<section><h2>📊 Comparação com quarta-feira (07/10/2026)</h2>
+<ul class="cmp">
+<li><span class="lbl">🏠 Locação</span><span class="nums"><span class="prev">33</span><span class="now">46</span><span class="up">+13 (+39%)</span></span></li>
+<li><span class="lbl">🔑 Vendas</span><span class="nums"><span class="prev">11</span><span class="now">6</span><span class="dn">-5 (-45%)</span></span></li>
+</ul></section>
+<footer>Gerado por <b>Big Julio</b> · 09/10/2026 12:36<br>
+Fonte: CRM ImóvelOffice (cadastro + horário, regra 18h) + Planilha Recepção (SharePoint)<br>
+Regra Jéssica: 1 cliente = 1 atendimento, ordem fixa, admin separado<br>
+<b>Julio Imóveis</b> — Brusque, SC</footer>
+</body></html>
