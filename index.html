@@ -3,116 +3,172 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atendimentos do Dia — Julio Imóveis</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<title>Julio Imóveis - Relatório Diário</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { --red: #E8192C; --red-light: #FFF1F2; --ink: #1A1A1A; --ink2: #444; --ink3: #777;
-  --bone: #FAF9F7; --card: #FFFFFF; --rule: #ECEAE6;
-  --green: #15803D; --green-bg: #F0FDF4; --amber: #B45309; --amber-bg: #FFFBEB; }
-*{ margin:0; padding:0; box-sizing:border-box; }
-html { font-size:17px; }
-body { font-family:'Inter',system-ui,sans-serif; background:var(--bone); color:var(--ink);
-  max-width:780px; margin:0 auto; padding:20px 16px 40px; -webkit-font-smoothing:antialiased; }
-header { background:var(--red); color:#fff; border-radius:14px; padding:32px 28px; margin-bottom:28px; text-align:center; }
-header h1 { font-size:1.5rem; font-weight:900; letter-spacing:4px; text-transform:uppercase; }
-header p { opacity:.8; font-size:.82rem; margin-top:2px; }
-header .dia { display:inline-block; margin-top:14px; background:rgba(0,0,0,.15); padding:8px 24px; border-radius:40px; font-weight:700; font-size:1.05rem; }
-.scores { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:26px; }
-.sc { background:var(--card); border:1px solid var(--rule); border-radius:12px; padding:20px 12px; text-align:center; }
-.sc em { font-style:normal; font-size:1.6rem; display:block; margin-bottom:4px; }
-.sc strong { display:block; font-size:2.6rem; font-weight:900; line-height:1; letter-spacing:-1px; }
-.sc span { display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--ink3); margin-top:6px; font-weight:600; }
-.sc.hero { background:var(--red); border-color:var(--red); color:#fff; }
-.sc.hero span { color:rgba(255,255,255,.7); }
-section { background:var(--card); border:1px solid var(--rule); border-radius:12px; padding:24px; margin-bottom:18px; }
-section h2 { font-size:1rem; font-weight:700; display:flex; align-items:center; gap:8px; padding-bottom:14px; border-bottom:2px solid var(--rule); margin-bottom:18px; }
-h2 .tag { font-size:.75rem; font-weight:700; padding:3px 12px; border-radius:20px; color:#fff; }
-h2 .tag.r { background:var(--red); } h2 .tag.g { background:var(--green); } h2 .tag.a { background:var(--amber); }
-table { width:100%; border-collapse:collapse; }
-td { padding:7px 0; vertical-align:middle; }
-td.or { width:140px; font-size:.88rem; font-weight:600; color:var(--ink2); text-align:right; padding-right:14px; }
-.track { height:32px; background:var(--rule); border-radius:6px; overflow:hidden; }
-.fill { height:100%; border-radius:6px; background:var(--red); }
-section.vendas .fill { background:var(--green); }
-section.admin .fill { background:var(--amber); }
-td.vl { width:36px; text-align:center; font-size:1.3rem; font-weight:800; padding-left:12px; }
-td.pc { width:52px; text-align:right; font-size:.82rem; color:var(--ink3); }
-.note { margin-top:16px; padding:14px 18px; border-radius:8px; font-size:.88rem; line-height:1.6; color:var(--ink2); }
-.note.r { background:var(--red-light); border-left:3px solid var(--red); }
-.note.g { background:var(--green-bg); border-left:3px solid var(--green); }
-.note.a { background:var(--amber-bg); border-left:3px solid var(--amber); }
-.note b { color:var(--ink); }
-.cmp { list-style:none; }
-.cmp li { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid var(--rule); font-size:.95rem; }
-.cmp li:last-child { border:0; }
-.cmp .lbl { font-weight:600; } .cmp .nums { display:flex; align-items:center; gap:14px; }
-.cmp .prev { color:var(--ink3); text-decoration:line-through; font-size:1.1rem; }
-.cmp .now { font-weight:800; font-size:1.4rem; }
-.up { color:var(--green); font-weight:700; font-size:.9rem; }
-.dn { color:#DC2626; font-weight:700; font-size:.9rem; }
-.eq { color:var(--ink3); font-weight:600; font-size:.9rem; }
-.adm-table { width:100%; border-collapse:collapse; margin-top:8px; }
-.adm-table th { text-align:left; font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; color:var(--ink3); padding:8px 10px; border-bottom:2px solid var(--rule); }
-.adm-table td { padding:10px; font-size:.92rem; border-bottom:1px solid var(--rule); }
-.adm-table tr:last-child td { border-bottom:2px solid var(--rule); font-weight:700; }
-.adm-table .num { text-align:center; font-weight:600; }
-footer { text-align:center; padding:24px 0 0; font-size:.72rem; color:var(--ink3); line-height:1.7; }
-footer b { color:var(--red); }
-@media(max-width:600px) { html { font-size:15px; } .scores { grid-template-columns:repeat(2,1fr); }
-  td.or { width:90px; font-size:.78rem; } .sc strong { font-size:2rem; } }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#FAF9F7; color:#222; min-height:100vh; }
+.container { max-width:680px; margin:0 auto; padding:24px 16px 40px; }
+.header { text-align:center; margin-bottom:28px; }
+.header h1 { font-size:22px; font-weight:700; color:#E8192C; margin-bottom:4px; }
+.header .date { font-size:14px; color:#888; font-weight:400; }
+.cards { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:28px; }
+.card { background:#fff; border-radius:12px; padding:16px 12px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.card .label { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; font-weight:500; }
+.card .value { font-size:28px; font-weight:700; color:#E8192C; }
+.section { background:#fff; border-radius:12px; padding:20px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.section h2 { font-size:15px; font-weight:600; color:#E8192C; margin-bottom:14px; text-transform:uppercase; letter-spacing:0.5px; }
+.footer { text-align:center; margin-top:20px; font-size:11px; color:#bbb; }
+@media (max-width:500px) {
+    .cards { grid-template-columns:repeat(2,1fr); }
+    .card .value { font-size:22px; }
+}
 </style>
 </head>
 <body>
-<header>
-  <h1>Julio Imóveis</h1>
-  <p>Relatório Diário de Atendimentos</p>
-  <div class="dia">Domingo, 11/10/2026</div>
-</header>
-<div class="scores">
-  <div class="sc"><em>🏠</em><strong>11</strong><span>Locação</span></div>
-  <div class="sc"><em>🔑</em><strong style="color:var(--green)">1</strong><span>Vendas</span></div>
-  <div class="sc"><em>📞</em><strong style="color:var(--amber)">0</strong><span>Admin</span></div>
-  <div class="sc hero"><em>📊</em><strong>12</strong><span>Total do dia</span></div>
+<div class="container">
+    <div class="header">
+        <h1>📊 Julio Imóveis</h1>
+        <div class="date">Relatório de Atendimentos — 12/10/2026 (Segunda-feira)</div>
+    </div>
+    
+    <div class="cards">
+        <div class="card">
+            <div class="label">Locação</div>
+            <div class="value">11</div>
+        </div>
+        <div class="card">
+            <div class="label">Vendas</div>
+            <div class="value">2</div>
+        </div>
+        <div class="card">
+            <div class="label">Admin</div>
+            <div class="value">0</div>
+        </div>
+        <div class="card">
+            <div class="label">Total</div>
+            <div class="value">13</div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>🏠 Locação — 11 atendimentos</h2>
+        
+            <div style="display:flex;align-items:center;margin-bottom:8px;">
+                <div style="width:120px;font-size:13px;color:#444;flex-shrink:0;">Chaves na Mão</div>
+                <div style="flex:1;background:#f0eded;border-radius:6px;height:28px;margin:0 12px;position:relative;">
+                    <div style="width:66.66666666666666%;background:#E8192C;border-radius:6px;height:100%;min-width:2px;"></div>
+                </div>
+                <div style="width:60px;text-align:right;font-weight:600;font-size:14px;color:#222;">4 <span style="font-weight:400;font-size:12px;color:#888;">(36%)</span></div>
+            </div>
+            <div style="display:flex;align-items:center;margin-bottom:8px;">
+                <div style="width:120px;font-size:13px;color:#444;flex-shrink:0;">Grupo OLX</div>
+                <div style="flex:1;background:#f0eded;border-radius:6px;height:28px;margin:0 12px;position:relative;">
+                    <div style="width:100.0%;background:#E8192C;border-radius:6px;height:100%;min-width:2px;"></div>
+                </div>
+                <div style="width:60px;text-align:right;font-weight:600;font-size:14px;color:#222;">6 <span style="font-weight:400;font-size:12px;color:#888;">(55%)</span></div>
+            </div>
+            <div style="display:flex;align-items:center;margin-bottom:8px;">
+                <div style="width:120px;font-size:13px;color:#444;flex-shrink:0;">Site Julio</div>
+                <div style="flex:1;background:#f0eded;border-radius:6px;height:28px;margin:0 12px;position:relative;">
+                    <div style="width:16.666666666666664%;background:#E8192C;border-radius:6px;height:100%;min-width:2px;"></div>
+                </div>
+                <div style="width:60px;text-align:right;font-weight:600;font-size:14px;color:#222;">1 <span style="font-weight:400;font-size:12px;color:#888;">(9%)</span></div>
+            </div>
+    </div>
+    
+    <div class="section">
+        <h2>🔑 Vendas — 2 atendimentos</h2>
+        
+            <div style="display:flex;align-items:center;margin-bottom:8px;">
+                <div style="width:120px;font-size:13px;color:#444;flex-shrink:0;">Chaves na Mão</div>
+                <div style="flex:1;background:#f0eded;border-radius:6px;height:28px;margin:0 12px;position:relative;">
+                    <div style="width:100.0%;background:#E8192C;border-radius:6px;height:100%;min-width:2px;"></div>
+                </div>
+                <div style="width:60px;text-align:right;font-weight:600;font-size:14px;color:#222;">2 <span style="font-weight:400;font-size:12px;color:#888;">(100%)</span></div>
+            </div>
+    </div>
+    
+    <div class="section">
+        <h2>📋 Admin — 0 atendimentos</h2>
+        
+    <table style="width:100%;border-collapse:collapse;margin-top:8px;">
+        <thead>
+            <tr style="background:#f5f5f5;">
+                <th style="padding:8px 12px;text-align:left;font-size:12px;color:#888;font-weight:500;">Área</th>
+                <th style="padding:8px 12px;text-align:center;font-size:12px;color:#888;font-weight:500;">Ligação</th>
+                <th style="padding:8px 12px;text-align:center;font-size:12px;color:#888;font-weight:500;">Recepção</th>
+                <th style="padding:8px 12px;text-align:center;font-size:12px;color:#888;font-weight:500;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;">Adm Locação</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:14px;font-weight:500;">0</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:14px;font-weight:500;">0</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:14px;font-weight:600;">0</td>
+        </tr>
+        <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;">Adm Vendas</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:14px;font-weight:500;">0</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:14px;font-weight:500;">0</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:14px;font-weight:600;">0</td>
+        </tr>
+        <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;">FEX Seguros</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:14px;font-weight:500;">0</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:14px;font-weight:500;">0</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:14px;font-weight:600;">0</td>
+        </tr>
+    <tr style="background:#faf0f0;">
+        <td style="padding:8px 12px;font-size:13px;font-weight:700;">TOTAL</td>
+        <td style="padding:8px 12px;text-align:center;font-size:14px;font-weight:700;">0</td>
+        <td style="padding:8px 12px;text-align:center;font-size:14px;font-weight:700;">0</td>
+        <td style="padding:8px 12px;text-align:center;font-size:14px;font-weight:700;">0</td>
+    </tr></tbody>
+    </table>
+    </div>
+    
+    <div class="section">
+        <h2>📈 Comparativo vs Dia Anterior (11/10/2026)</h2>
+        
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee;">
+            <span style="font-size:14px;color:#444;">Locação</span>
+            <div>
+                <span style="font-size:16px;font-weight:600;">11</span>
+                <span style="font-size:13px;color:#888;margin-left:8px;">= 0</span>
+                <span style="font-size:12px;color:#aaa;margin-left:4px;">(ant: 11)</span>
+            </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee;">
+            <span style="font-size:14px;color:#444;">Vendas</span>
+            <div>
+                <span style="font-size:16px;font-weight:600;">2</span>
+                <span style="font-size:13px;color:#27ae60;margin-left:8px;">↑ +1</span>
+                <span style="font-size:12px;color:#aaa;margin-left:4px;">(ant: 1)</span>
+            </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee;">
+            <span style="font-size:14px;color:#444;">Admin</span>
+            <div>
+                <span style="font-size:16px;font-weight:600;">0</span>
+                <span style="font-size:13px;color:#888;margin-left:8px;">= 0</span>
+                <span style="font-size:12px;color:#aaa;margin-left:4px;">(ant: 0)</span>
+            </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee;">
+            <span style="font-size:14px;color:#444;">Total</span>
+            <div>
+                <span style="font-size:16px;font-weight:600;">13</span>
+                <span style="font-size:13px;color:#27ae60;margin-left:8px;">↑ +1</span>
+                <span style="font-size:12px;color:#aaa;margin-left:4px;">(ant: 12)</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        Gerado automaticamente em 12/10/2026 • Julio Imóveis — Projetos & Marketing
+    </div>
 </div>
-<section>
-  <h2>🏠 Locação <span class="tag r">11</span></h2>
-  <table><tr><td class="or">Chaves na Mão</td><td class="br"><div class="track"><div class="fill" style="width:57%"></div></div></td><td class="vl">4</td><td class="pc">36.4%</td></tr>
-<tr><td class="or">Grupo OLX</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">7</td><td class="pc">63.6%</td></tr>
-</table>
-  <div class="note r"><b>Grupo OLX</b> lidera com 7 atendimentos (63.6%).</div>
-</section>
-<section class="vendas">
-  <h2>🔑 Vendas <span class="tag g">1</span></h2>
-  <table><tr><td class="or">Grupo OLX</td><td class="br"><div class="track"><div class="fill" style="width:100%"></div></div></td><td class="vl">1</td><td class="pc">100.0%</td></tr>
-</table>
-</section>
-<section class="admin">
-  <h2>📞 Administrativo <span class="tag a">0</span></h2>
-  <table class="adm-table">
-    <tr><th>Área</th><th class="num">Ligação</th><th class="num">Recepção</th><th class="num">Total</th></tr>
-    <tr><td>ADM Locação</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
-    <tr><td>ADM Vendas</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
-    <tr><td>FEX Seguros</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
-    <tr><td><b>TOTAL</b></td><td class="num"><b>0</b></td><td class="num"><b>0</b></td><td class="num"><b>0</b></td></tr>
-  </table>
-  <div class="note a">Dados da planilha de recepção (SharePoint). Domingo — sem atendimento administrativo.</div>
-</section>
-<section>
-  <h2>📊 Comparativo com quinta-feira (08/10/2026)</h2>
-  <ul class="cmp">
-    <li><span class="lbl">🏠 Locação</span><span class="nums"><span class="prev">46</span><span class="now">11</span><span class="dn">▼ -35 (-76%)</span></span></li>
-    <li><span class="lbl">🔑 Vendas</span><span class="nums"><span class="prev">6</span><span class="now">1</span><span class="dn">▼ -5 (-83%)</span></span></li>
-    <li><span class="lbl">📞 Admin</span><span class="nums"><span class="prev">27</span><span class="now">0</span><span class="dn">▼ -27 (-100%)</span></span></li>
-    <li><span class="lbl">📊 Total</span><span class="nums"><span class="prev">79</span><span class="now">12</span><span class="dn">▼ -67 (-85%)</span></span></li>
-  </ul>
-  <div class="note r">⚠️ Queda esperada — <b>domingo</b> vs dia útil (quinta-feira).</div>
-</section>
-<footer>
-  Gerado por <b>Big Julio</b> · 12/10/2026 07:41<br>
-  Fonte: CRM ImóvelOffice (cadastro + horário) + Planilha Recepção (SharePoint)<br>
-  Regra Jéssica: cadastro D-1 18h a D 18h, finalizados incluídos<br>
-  <b>Julio Imóveis</b> — Brusque, SC
-</footer>
 </body>
 </html>
