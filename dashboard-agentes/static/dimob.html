@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conferência DIMOB 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<style>
+:root{
+  --bg:#12151c; --surface:#1a1e28; --fg:#e8ebf2; --muted:#9aa3b5; --line:#2b3140;
+  --accent:#8f9cf5; --accent-soft:#252b4a;
+  --red:#f0868c; --red-soft:#3a1d21; --amber:#f1b65c; --amber-soft:#3a2c14;
+  --blue:#7fb6ea; --blue-soft:#18293b; --gray:#b0b7c5; --gray-soft:#262b36;
+  --ok:#6fd39a; --ok-soft:#173226;
+  --f-display:"Fraunces",Georgia,serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 16px 60px;display:grid;gap:22px}
+header{display:grid;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:12px}
+.eyebrow a{font-size:11px;letter-spacing:.04em;text-transform:none;background:var(--accent-soft);padding:3px 10px;border-radius:6px;color:var(--accent)}
+h1{font-family:var(--f-display);font-weight:600;font-size:clamp(26px,4vw,34px);text-wrap:balance}
+.sub{color:var(--muted);max-width:75ch}
+
+/* Stats cards */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;text-align:center}
+.stat .val{font-family:var(--f-mono);font-size:28px;font-weight:500;font-variant-numeric:tabular-nums}
+.stat .label{font-size:12px;color:var(--muted);margin-top:2px}
+.stat.match .val{color:var(--ok)}
+.stat.diverge .val{color:var(--amber)}
+.stat.error .val{color:var(--red)}
+.stat.alterado .val{color:var(--blue)}
+
+/* Progress bar */
+.progress{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.bar{flex:1 1 220px;height:8px;background:var(--gray-soft);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.count{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:14px}
+.sync{font-size:12px;color:var(--muted)}
+
+/* Filters */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;font-size:13px;padding:6px 12px;border-radius:99px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;transition:all .15s}
+.chip b{font-family:var(--f-mono);font-weight:500;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chip[aria-pressed="true"] b{color:var(--bg)}
+.chip:hover{border-color:var(--accent)}
+.toggle{font-size:13px;color:var(--muted);display:inline-flex;gap:6px;align-items:center;margin-left:auto}
+
+/* Search */
+.search-box{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 14px;color:var(--fg);font:inherit;font-size:14px;width:100%;max-width:320px}
+.search-box:focus{outline:2px solid var(--accent);outline-offset:-2px;border-color:var(--accent)}
+
+/* Table */
+.table-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{background:var(--gray-soft);font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:10px 12px;text-align:left;white-space:nowrap;position:sticky;top:0;z-index:2}
+td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.02)}
+tr.row-match td{} 
+tr.row-diverge td{background:var(--amber-soft)}
+tr.row-error td{background:var(--red-soft)}
+tr.row-done{opacity:.45}
+tr.row-done .ct-code{text-decoration:line-through}
+
+.ct-code{font-family:var(--f-mono);font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.t-match{background:var(--ok-soft);color:var(--ok)}
+.t-diverge{background:var(--amber-soft);color:var(--amber)}
+.t-error{background:var(--red-soft);color:var(--red)}
+.t-alterado{background:var(--blue-soft);color:var(--blue)}
+.t-multi{background:var(--accent-soft);color:var(--accent);margin-left:4px}
+
+.val-ok{color:var(--ok)}
+.val-diff{color:var(--red);font-weight:600}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:13px}
+
+/* Expand row */
+.expand-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px;transition:transform .2s}
+.expand-btn.open{transform:rotate(90deg)}
+.expand-btn:hover{color:var(--fg)}
+
+.detail-row td{padding:0;background:var(--bg)!important}
+.detail-inner{padding:12px 16px 16px 52px;display:grid;gap:10px}
+.detail-inner h4{font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.month-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:12.5px}
+.month-card.has-diff{border-color:var(--red);background:var(--red-soft)}
+.month-label{font-weight:600;color:var(--muted);margin-bottom:4px}
+.month-vals{display:grid;grid-template-columns:auto 1fr;gap:2px 8px}
+.month-vals dt{color:var(--muted)}
+.month-vals dd{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* Acordos section */
+.acordos-section{display:grid;gap:12px}
+.acordos-section h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;gap:8px;align-items:center}
+.acordos-section h2 .n{font-family:var(--f-mono);font-weight:500}
+.acordos-stats{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+.acordos-stats span{display:flex;gap:6px;align-items:center}
+.acordos-stats .num{color:var(--accent)}
+.acordos-list{max-height:400px;overflow-y:auto}
+
+/* Checkbox */
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--ok);cursor:pointer;margin:0}
+
+/* Loading */
+.loading{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+.loading::after{content:'';display:inline-block;width:20px;height:20px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;margin-left:10px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+  table{font-size:12px}
+  th,td{padding:8px 6px}
+  .detail-inner{padding-left:12px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">
+      SicadiWeb · DIMOB Locação · período 2026
+      <a href="/">← Dashboard</a>
+    </span>
+    <h1>Conferência DIMOB 2026</h1>
+    <p class="sub">Comparação automatizada entre a tela DIMOB (Consultar CPF) e o Extrato do Locador. Dados atualizados em tempo real.</p>
+  </header>
+
+  <div class="stats" id="stats">
+    <div class="stat"><div class="val" id="st-total">-</div><div class="label">Total Contratos</div></div>
+    <div class="stat match"><div class="val" id="st-match">-</div><div class="label">✅ Match</div></div>
+    <div class="stat diverge"><div class="val" id="st-diverge">-</div><div class="label">⚠️ Divergem</div></div>
+    <div class="stat error"><div class="val" id="st-error">-</div><div class="label">❌ Erros</div></div>
+    <div class="stat alterado"><div class="val" id="st-alterado">-</div><div class="label">🔄 Alterados</div></div>
+  </div>
+
+  <div class="progress">
+    <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+    <span class="count" id="count">0 de 0 conferidos</span>
+    <span class="sync" id="sync">Carregando…</span>
+  </div>
+
+  <div class="filters" id="filters-bar">
+    <input type="text" class="search-box" id="search" placeholder="Buscar contrato, locador, CPF…">
+  </div>
+  <div class="filters" id="filters"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:28px"></th>
+          <th style="width:28px">✓</th>
+          <th>Contrato</th>
+          <th>Locador</th>
+          <th>DIMOB Bruto</th>
+          <th>DIMOB Com.</th>
+          <th>DIMOB IR</th>
+          <th>Extrato Bruto</th>
+          <th>Extrato Com.</th>
+          <th>Extrato IR</th>
+          <th>Δ Bruto</th>
+          <th>Δ Com.</th>
+          <th>Δ IR</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="loading" id="loading">Carregando dados DIMOB</div>
+
+  <div class="acordos-section" id="acordos-section" style="display:none">
+    <h2>📋 Acordos com Repasse de Parcela <span class="n" id="acordos-count"></span></h2>
+    <div class="acordos-stats" id="acordos-stats"></div>
+    <div class="table-wrap acordos-list">
+      <table>
+        <thead>
+          <tr>
+            <th>Contrato</th>
+            <th>Locatário</th>
+            <th>Valor</th>
+            <th>Data</th>
+            <th>Complemento</th>
+          </tr>
+        </thead>
+        <tbody id="acordos-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+let DATA = null;
+let ACORDOS = null;
+let filter = 'all';
+let hideDone = false;
+let searchTerm = '';
+let checks = {};
+
+// Load checks from localStorage
+try { checks = JSON.parse(localStorage.getItem('dimob2026-live-checks') || '{}'); } catch(e) {}
+
+function saveChecks() {
+  try { localStorage.setItem('dimob2026-live-checks', JSON.stringify(checks)); } catch(e) {}
+}
+
+function fmt(v) {
+  if (v == null || v === '') return '—';
+  return Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function diffClass(v) {
+  if (v == null) return 'num';
+  return Math.abs(v) < 0.01 ? 'num val-ok' : 'num val-diff';
+}
+
+function statusTag(c) {
+  const s = c.status;
+  if (s === '✅') return '<span class="tag t-match">✅ Match</span>';
+  if (s === '⚠️') return '<span class="tag t-diverge">⚠️ Diverge</span>';
+  if (s === '❌') return '<span class="tag t-error">❌ Erro</span>';
+  return '<span class="tag">' + (s||'?') + '</span>';
+}
+
+function getFilterStatus(c) {
+  if (c.status === '✅') return 'match';
+  if (c.status === '⚠️') return 'diverge';
+  if (c.status === '❌') return 'error';
+  return 'other';
+}
+
+function matchesFilter(c) {
+  if (filter === 'all') return true;
+  if (filter === 'match') return c.status === '✅';
+  if (filter === 'diverge') return c.status === '⚠️';
+  if (filter === 'error') return c.status === '❌';
+  if (filter === 'alterado') return c.alterado;
+  if (filter === 'multi') return c.multi_locador;
+  return true;
+}
+
+function matchesSearch(c) {
+  if (!searchTerm) return true;
+  const s = searchTerm.toLowerCase();
+  return (c.contrato||'').toLowerCase().includes(s) ||
+         (c.locador||'').toLowerCase().includes(s) ||
+         (c.locador_cpf||'').toLowerCase().includes(s);
+}
+
+function render() {
+  if (!DATA) return;
+
+  const contratos = DATA.contratos.filter(c => {
+    if (hideDone && checks[c.contrato + '_' + c.locador_cpf]) return false;
+    return matchesFilter(c) && matchesSearch(c);
+  });
+
+  // Stats
+  document.getElementById('st-total').textContent = DATA.total;
+  document.getElementById('st-match').textContent = DATA.match;
+  document.getElementById('st-diverge').textContent = DATA.diverge;
+  document.getElementById('st-error').textContent = DATA.error;
+  document.getElementById('st-alterado').textContent = DATA.alterado;
+
+  // Progress
+  const checkedCount = DATA.contratos.filter(c => checks[c.contrato + '_' + c.locador_cpf]).length;
+  document.getElementById('count').textContent = checkedCount + ' de ' + DATA.total + ' conferidos';
+  document.getElementById('barFill').style.width = (DATA.total ? checkedCount/DATA.total*100 : 0) + '%';
+
+  // Filters
+  const fDiv = document.getElementById('filters');
+  fDiv.innerHTML = '';
+  const mkChip = (k, label, cnt) => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.type = 'button';
+    b.setAttribute('aria-pressed', filter === k);
+    b.innerHTML = label + ' <b>' + cnt + '</b>';
+    b.onclick = () => { filter = k; render(); };
+    fDiv.append(b);
+  };
+  mkChip('all', 'Todos', DATA.total);
+  mkChip('match', '✅ Match', DATA.match);
+  mkChip('diverge', '⚠️ Diverge', DATA.diverge);
+  if (DATA.error > 0) mkChip('error', '❌ Erro', DATA.error);
+  mkChip('alterado', '🔄 Alterados', DATA.alterado);
+  mkChip('multi', '👥 Multi-locador', DATA.multi_locador);
+
+  const tl = document.createElement('label');
+  tl.className = 'toggle';
+  tl.innerHTML = '<input type="checkbox" ' + (hideDone ? 'checked' : '') + '> Ocultar conferidos';
+  tl.querySelector('input').onchange = function() { hideDone = this.checked; render(); };
+  fDiv.append(tl);
+
+  // Table
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  document.getElementById('loading').style.display = 'none';
+
+  contratos.forEach(c => {
+    const key = c.contrato + '_' + c.locador_cpf;
+    const isDone = !!checks[key];
+    const dt = c.dimob_tela || {};
+    const ex = c.extrato || {};
+    const df = c.diff || {};
+    const rowClass = isDone ? 'row-done' : (c.status === '⚠️' ? 'row-diverge' : (c.status === '❌' ? 'row-error' : 'row-match'));
+
+    const tr = document.createElement('tr');
+    tr.className = rowClass;
+    tr.innerHTML = `
+      <td><button class="expand-btn" data-key="${key}">▶</button></td>
+      <td><input type="checkbox" ${isDone ? 'checked' : ''} data-key="${key}"></td>
+      <td class="ct-code">${c.contrato||''}</td>
+      <td>${(c.locador||'').substring(0,25)}${c.multi_locador ? '<span class="tag t-multi">ML</span>' : ''}<br><small style="color:var(--muted)">${c.locador_cpf||''}</small></td>
+      <td class="num">${fmt(dt.bruto)}</td>
+      <td class="num">${fmt(dt.comissao)}</td>
+      <td class="num">${fmt(dt.retido)}</td>
+      <td class="num">${fmt(ex.bruto)}</td>
+      <td class="num">${fmt(ex.comissao)}</td>
+      <td class="num">${fmt(ex.retido)}</td>
+      <td class="${diffClass(df.bruto)}">${fmt(df.bruto)}</td>
+      <td class="${diffClass(df.comissao)}">${fmt(df.comissao)}</td>
+      <td class="${diffClass(df.retido)}">${fmt(df.retido)}</td>
+      <td>${statusTag(c)}${c.alterado ? '<span class="tag t-alterado" style="margin-left:4px">🔄</span>' : ''}</td>
+    `;
+    tbody.append(tr);
+
+    // Checkbox handler
+    tr.querySelector('input[type=checkbox]').onchange = function() {
+      checks[key] = this.checked;
+      if (!this.checked) delete checks[key];
+      saveChecks();
+      render();
+    };
+
+    // Expand handler
+    tr.querySelector('.expand-btn').onclick = function(e) {
+      e.stopPropagation();
+      const detailId = 'detail-' + key.replace(/[^a-zA-Z0-9]/g, '_');
+      const existing = document.getElementById(detailId);
+      if (existing) {
+        existing.remove();
+        this.classList.remove('open');
+        return;
+      }
+      this.classList.add('open');
+
+      const detailTr = document.createElement('tr');
+      detailTr.className = 'detail-row';
+      detailTr.id = detailId;
+      const detailTd = document.createElement('td');
+      detailTd.colSpan = 14;
+
+      let html = '<div class="detail-inner">';
+
+      // Month breakdown
+      const meses = c.meses_extrato || {};
+      const meseKeys = Object.keys(meses).sort((a,b) => Number(a) - Number(b));
+      if (meseKeys.length) {
+        html += '<h4>Detalhamento Mês a Mês (Extrato do Locador)</h4>';
+        html += '<div class="month-grid">';
+        meseKeys.forEach(m => {
+          const mv = meses[m];
+          // Check if DIMOB has matching month data from snapshot
+          const snap = c.snapshot || {};
+          const hasDiff = c.status === '⚠️';
+          html += `<div class="month-card${hasDiff ? '' : ''}">
+            <div class="month-label">${MONTHS[Number(m)] || 'Mês '+m}</div>
+            <dl class="month-vals">
+              <dt>Bruto:</dt><dd>${fmt(mv.bruto)}</dd>
+              <dt>Comissão:</dt><dd>${fmt(mv.comissao)}</dd>
+              <dt>IR:</dt><dd>${fmt(mv.retido)}</dd>
+            </dl>
+          </div>`;
+        });
+        html += '</div>';
+      }
+
+      // Snapshot comparison
+      if (c.snapshot) {
+        const s = c.snapshot;
+        html += '<h4>Snapshot DIMOB Tela (último valor capturado)</h4>';
+        html += `<div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px">
+          <span>Bruto: <b class="num">${fmt(s.bruto)}</b></span>
+          <span>Comissão: <b class="num">${fmt(s.comissao)}</b></span>
+          <span>IR: <b class="num">${fmt(s.retido)}</b></span>
+        </div>`;
+        if (c.alterado) {
+          html += '<div style="margin-top:6px"><span class="tag t-alterado">🔄 Valor alterado desde o snapshot</span></div>';
+        }
+      }
+
+      html += '<div style="font-size:11px;color:var(--muted);margin-top:8px">Fonte: Extrato do Locador via API Locação | Tela DIMOB via Consultar CPF</div>';
+      html += '</div>';
+
+      detailTd.innerHTML = html;
+      detailTr.append(detailTd);
+      tr.after(detailTr);
+    };
+  });
+
+  document.getElementById('sync').textContent = 'Última atualização: ' + new Date().toLocaleTimeString('pt-BR');
+}
+
+// Search
+document.getElementById('search').oninput = function() {
+  searchTerm = this.value;
+  render();
+};
+
+// Fetch data
+async function loadData() {
+  try {
+    const [confRes, acordosRes] = await Promise.all([
+      fetch('/api/v1/dimob/conferencia'),
+      fetch('/api/v1/dimob/acordos')
+    ]);
+
+    if (confRes.status === 401 || acordosRes.status === 401) {
+      window.location.href = '/login';
+      return;
+    }
+
+    DATA = await confRes.json();
+    ACORDOS = await acordosRes.json();
+
+    render();
+    renderAcordos();
+  } catch(e) {
+    document.getElementById('loading').textContent = 'Erro ao carregar dados: ' + e.message;
+  }
+}
+
+function renderAcordos() {
+  if (!ACORDOS || !ACORDOS.total_acordos) return;
+
+  const section = document.getElementById('acordos-section');
+  section.style.display = '';
+
+  document.getElementById('acordos-count').textContent =
+    ACORDOS.total_acordos + ' acordos em ' + ACORDOS.total_contratos + ' contratos';
+
+  document.getElementById('acordos-stats').innerHTML = `
+    <span>Total acordos: <b class="num">${ACORDOS.total_acordos}</b></span>
+    <span>Contratos: <b class="num">${ACORDOS.total_contratos}</b></span>
+    <span>Valor total: <b class="num">R$ ${fmt(ACORDOS.total_valor)}</b></span>
+  `;
+
+  const tbody = document.getElementById('acordos-tbody');
+  tbody.innerHTML = '';
+
+  // Show first 50, with a "show all" button
+  const items = ACORDOS.acordos.slice(0, 50);
+  items.forEach(a => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="ct-code">${a.contrato||''}</td>
+      <td>${(a.locatario||'').substring(0,30)}</td>
+      <td class="num">R$ ${fmt(a.valor)}</td>
+      <td style="white-space:nowrap">${(a.data||'').substring(0,10)}</td>
+      <td style="font-size:12px;color:var(--muted);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.complemento||''}</td>
+    `;
+    tbody.append(tr);
+  });
+
+  if (ACORDOS.acordos.length > 50) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="5" style="text-align:center;padding:12px">
+      <button class="chip" onclick="showAllAcordos()" id="show-all-btn">Mostrar todos (${ACORDOS.acordos.length})</button>
+    </td>`;
+    tbody.append(tr);
+  }
+}
+
+function showAllAcordos() {
+  const tbody = document.getElementById('acordos-tbody');
+  tbody.innerHTML = '';
+  ACORDOS.acordos.forEach(a => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="ct-code">${a.contrato||''}</td>
+      <td>${(a.locatario||'').substring(0,30)}</td>
+      <td class="num">R$ ${fmt(a.valor)}</td>
+      <td style="white-space:nowrap">${(a.data||'').substring(0,10)}</td>
+      <td style="font-size:12px;color:var(--muted);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.complemento||''}</td>
+    `;
+    tbody.append(tr);
+  });
+}
+
+loadData();
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-"""Dashboard de Gestão de Agentes — Julio Imóveis (Fase 1 + Fase 2 + Fase 3)"""
+"""Dashboard de Gestão de Agentes — Julio Imóveis (Fase 1 + Fase 2 + Fase 3 + Chat V2 Fase 3)"""
 
 import json
 import os
@@ -11,10 +11,14 @@ import hashlib
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-from fastapi import FastAPI, Request, Response, Form, HTTPException
+import asyncio
+import threading
+
+from fastapi import FastAPI, Request, Response, Form, HTTPException, UploadFile, File
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import StreamingResponse
 
 app = FastAPI(title="Dashboard Agentes - Julio Imóveis", version="3.0.0")
 
@@ -860,6 +864,962 @@ def usage_by_agent():
         })
 
     return agents
+
+
+# --- DIMOB Conferência Endpoints ---
+
+DIMOB_CONFERENCIA_PATH = Path("/home/hermes/cerebro-projetos-marketing/relatorios/dados/dimob-2026-novos-conferencia.json")
+DIMOB_SNAPSHOT_PATH = Path("/tmp/dimob-2026-snapshot-atual.json")
+DIMOB_ACORDOS_PATH = Path("/tmp/dimob-acordos-2026-completo.json")
+
+
+def _load_json_safe(path: Path):
+    """Load JSON file safely, return empty list/dict on error."""
+    if not path.exists():
+        return []
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+
+@app.get("/api/v1/dimob/conferencia")
+def dimob_conferencia():
+    """Return DIMOB conference data with snapshot merge."""
+    conferencia = _load_json_safe(DIMOB_CONFERENCIA_PATH)
+    snapshot_raw = _load_json_safe(DIMOB_SNAPSHOT_PATH)
+
+    # Build snapshot lookup
+    snapshot = {}
+    if isinstance(snapshot_raw, dict):
+        for key, val in snapshot_raw.items():
+            ct = val.get("contrato", "")
+            cpf = val.get("locador_cpf", "")
+            snapshot[f"{ct}_{cpf}"] = val
+    elif isinstance(snapshot_raw, list):
+        for val in snapshot_raw:
+            ct = val.get("contrato", "")
+            cpf = val.get("locador_cpf", "")
+            snapshot[f"{ct}_{cpf}"] = val
+
+    # Detect multi-locador (same CPF appears in multiple contracts)
+    cpf_counts: dict[str, int] = {}
+    for c in conferencia:
+        cpf = c.get("locador_cpf", "")
+        cpf_counts[cpf] = cpf_counts.get(cpf, 0) + 1
+
+    # Enrich conferencia with snapshot and multi-locador
+    for c in conferencia:
+        key = f"{c.get('contrato', '')}_{c.get('locador_cpf', '')}"
+        snap = snapshot.get(key)
+        c["snapshot"] = snap
+        c["multi_locador"] = cpf_counts.get(c.get("locador_cpf", ""), 0) > 1
+
+        # Detect changes vs snapshot
+        if snap:
+            dimob = c.get("dimob_tela", {})
+            changed = False
+            for field in ["bruto", "comissao", "retido"]:
+                if abs((dimob.get(field, 0) or 0) - (snap.get(field, 0) or 0)) > 0.01:
+                    changed = True
+                    break
+            c["alterado"] = changed
+        else:
+            c["alterado"] = False
+
+    # Stats
+    total = len(conferencia)
+    match_count = sum(1 for c in conferencia if c.get("status") == "✅")
+    diverge_count = sum(1 for c in conferencia if c.get("status") == "⚠️")
+    error_count = sum(1 for c in conferencia if c.get("status") == "❌")
+    alterado_count = sum(1 for c in conferencia if c.get("alterado"))
+    multi_count = sum(1 for c in conferencia if c.get("multi_locador"))
+
+    return {
+        "total": total,
+        "match": match_count,
+        "diverge": diverge_count,
+        "error": error_count,
+        "alterado": alterado_count,
+        "multi_locador": multi_count,
+        "ultima_conferencia": datetime.now(timezone.utc).isoformat(),
+        "contratos": conferencia,
+    }
+
+
+@app.get("/api/v1/dimob/acordos")
+def dimob_acordos():
+    """Return DIMOB acordos data."""
+    acordos = _load_json_safe(DIMOB_ACORDOS_PATH)
+    if not isinstance(acordos, list):
+        acordos = []
+
+    # Group by contrato
+    by_contrato: dict[str, list] = {}
+    for a in acordos:
+        ct = a.get("contrato", "?")
+        by_contrato.setdefault(ct, []).append(a)
+
+    total_valor = sum(a.get("valor", 0) or 0 for a in acordos)
+
+    return {
+        "total_acordos": len(acordos),
+        "total_contratos": len(by_contrato),
+        "total_valor": round(total_valor, 2),
+        "acordos": acordos,
+        "por_contrato": {k: len(v) for k, v in by_contrato.items()},
+    }
+
+
+@app.get("/dimob", response_class=HTMLResponse)
+def dimob_page():
+    """Serve the DIMOB conference panel."""
+    return FileResponse(str(BASE_DIR / "static" / "dimob.html"))
+
+
+# --- Chat Financeiro Endpoints ---
+
+@app.get("/chat", response_class=HTMLResponse)
+def chat_page():
+    """Serve the chat interface for JI-Financeiro."""
+    return FileResponse(str(BASE_DIR / "static" / "chat.html"))
+
+
+def _clean_hermes_output(raw: str) -> str:
+    """Extract just the bot reply from hermes CLI output, stripping noise."""
+    lines = raw.split('\n')
+    # Try to extract content between Hermes box markers
+    in_box = False
+    box_lines = []
+    for line in lines:
+        if '☤ Hermes' in line or '╭─' in line and 'Hermes' in line:
+            in_box = True
+            continue
+        if in_box and line.strip().startswith('╰'):
+            in_box = False
+            continue
+        if in_box:
+            # Strip box border characters
+            cleaned = line.strip()
+            if cleaned.startswith('│'):
+                cleaned = cleaned[1:]
+            if cleaned.endswith('│'):
+                cleaned = cleaned[:-1]
+            box_lines.append(cleaned.strip())
+
+    if box_lines:
+        result = '\n'.join(box_lines).strip()
+        if result:
+            return result
+
+    # Fallback: remove known noise patterns
+    filtered = []
+    skip_patterns = [
+        'Query:', '⚠️', 'Normalized model', 'Initializing agent',
+        '────', '╭─', '╰─', 'Resume this session',
+        'hermes --resume', 'hermes -c', 'Session:', 'Title:',
+        'Duration:', 'Messages:', 'Token usage:', 'Cost:',
+    ]
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if any(stripped.startswith(p) for p in skip_patterns):
+            continue
+        if '╭' in stripped or '╰' in stripped or '│' in stripped:
+            cleaned = stripped.replace('│', '').strip()
+            if cleaned:
+                filtered.append(cleaned)
+            continue
+        filtered.append(stripped)
+
+    return '\n'.join(filtered).strip()
+
+
+@app.post("/api/v1/chat/send")
+async def chat_send(request: Request):
+    """Send a message to the JI-Financeiro bot and return the response (legacy sync endpoint)."""
+    body = await request.json()
+    message = body.get("message", "").strip()
+    conversation_id = body.get("conversation_id", "")
+    if not message:
+        return JSONResponse({"error": "Mensagem vazia"}, status_code=400)
+
+    # Build command with session context if available
+    cmd = ["hermes", "--profile", "ji-financeiro", "chat", "-q", message]
+    if conversation_id:
+        session_name = f"chat-fin-{conversation_id}"
+        cmd.extend(["--continue", session_name, "--create-if-missing"])
+
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        response_text = _clean_hermes_output(result.stdout)
+        if not response_text and result.stderr.strip():
+            response_text = "Desculpe, ocorreu um erro interno ao processar sua mensagem."
+        if not response_text:
+            response_text = "Sem resposta do assistente."
+        return {"response": response_text, "conversation_id": conversation_id}
+    except subprocess.TimeoutExpired:
+        return JSONResponse(
+            {"error": "O assistente demorou demais para responder. Tente novamente."},
+            status_code=504,
+        )
+    except Exception as e:
+        return JSONResponse({"error": f"Erro interno: {str(e)}"}, status_code=500)
+
+
+# --- Streaming Chat Endpoint (V2 — SSE) ---
+
+@app.post("/api/v1/chat/stream")
+async def chat_stream(request: Request):
+    """Stream bot response via Server-Sent Events (SSE).
+
+    Uses hermes --format stream-json which outputs JSONL:
+      {"type": "text", "text": "token..."}
+      {"type": "result", "text": "full response", ...}
+    """
+    body = await request.json()
+    message = body.get("message", "").strip()
+    conversation_id = body.get("conversation_id", "")
+    if not message:
+        return JSONResponse({"error": "Mensagem vazia"}, status_code=400)
+
+    # Build command
+    cmd = [
+        "hermes", "--profile", "ji-financeiro", "chat",
+        "-q", message, "--format", "stream-json",
+    ]
+    if conversation_id:
+        session_name = f"chat-fin-{conversation_id}"
+        cmd.extend(["--continue", session_name, "--create-if-missing"])
+
+    async def event_generator():
+        """Yield SSE events from hermes subprocess stdout."""
+        loop = asyncio.get_event_loop()
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+
+        full_text = ""
+        try:
+            while True:
+                try:
+                    line = await asyncio.wait_for(
+                        proc.stdout.readline(), timeout=180
+                    )
+                except asyncio.TimeoutError:
+                    yield f"data: {json.dumps({'type': 'error', 'text': 'Timeout — o assistente demorou demais.'})}\n\n"
+                    proc.kill()
+                    break
+
+                if not line:
+                    break
+
+                raw = line.decode("utf-8", errors="replace").strip()
+                if not raw:
+                    continue
+
+                # Skip non-JSON lines (stderr leaks, warnings)
+                if not raw.startswith("{"):
+                    continue
+
+                try:
+                    data = json.loads(raw)
+                except json.JSONDecodeError:
+                    continue
+
+                evt_type = data.get("type", "")
+
+                if evt_type == "text":
+                    token = data.get("text", "")
+                    full_text += token
+                    yield f"data: {json.dumps({'type': 'text', 'text': token})}\n\n"
+
+                elif evt_type == "result":
+                    # Final message — send complete signal
+                    final_text = data.get("text", full_text)
+                    yield f"data: {json.dumps({'type': 'done', 'text': final_text})}\n\n"
+
+                elif evt_type == "system":
+                    # Init event — can send as status
+                    yield f"data: {json.dumps({'type': 'status', 'text': 'Conectado ao assistente...'})}\n\n"
+
+            # If process ended without a result event, send what we have
+            await proc.wait()
+            if full_text and not any(True for _ in []):  # always send done
+                pass  # done already sent above in result handler
+
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'text': str(e)})}\n\n"
+        finally:
+            if proc.returncode is None:
+                try:
+                    proc.kill()
+                except ProcessLookupError:
+                    pass
+
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+# --- File Upload Endpoint ---
+
+UPLOAD_DIR = Path("/home/hermes/cerebro-financeiro/inbox")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+ALLOWED_EXTENSIONS = {".xlsx", ".pdf", ".png", ".jpg", ".jpeg", ".csv", ".txt", ".docx"}
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
+
+
+@app.post("/api/v1/chat/upload")
+async def chat_upload(request: Request, file: UploadFile = File(...)):
+    """Upload a file to the financeiro inbox. Returns the saved path."""
+    # Validate extension
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return JSONResponse(
+            {"error": f"Tipo de arquivo não permitido: {ext}. Aceitos: {', '.join(sorted(ALLOWED_EXTENSIONS))}"},
+            status_code=400,
+        )
+
+    # Read and validate size
+    content = await file.read()
+    if len(content) > MAX_UPLOAD_SIZE:
+        return JSONResponse(
+            {"error": f"Arquivo muito grande ({len(content) / 1024 / 1024:.1f}MB). Máximo: 10MB."},
+            status_code=400,
+        )
+
+    # Save with date prefix
+    date_prefix = datetime.now().strftime("%Y-%m-%d")
+    safe_name = re.sub(r'[^\w\-_.]', '_', file.filename)
+    dest_name = f"{date_prefix}-{safe_name}"
+    dest_path = UPLOAD_DIR / dest_name
+
+    # Avoid overwriting
+    counter = 1
+    while dest_path.exists():
+        stem = Path(dest_name).stem
+        dest_path = UPLOAD_DIR / f"{stem}_{counter}{ext}"
+        counter += 1
+
+    dest_path.write_bytes(content)
+
+    return {
+        "ok": True,
+        "filename": dest_path.name,
+        "path": str(dest_path),
+        "size": len(content),
+        "type": ext.lstrip("."),
+    }
+
+
+@app.get("/api/v1/chat/files/{filename}")
+async def serve_uploaded_file(filename: str):
+    """Serve an uploaded file (for image previews in chat)."""
+    safe = Path(filename).name  # prevent path traversal
+    fpath = UPLOAD_DIR / safe
+    if not fpath.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(str(fpath))
+
+
+# --- Chat V2 Phase 3: Persistent History (SQLite) ---
+
+CHAT_DB_PATH = BASE_DIR / "chat.db"
+
+
+def _init_chat_db():
+    """Create chat tables if they don't exist."""
+    conn = sqlite3.connect(str(CHAT_DB_PATH))
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS chat_conversations (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL DEFAULT 'Nova conversa',
+            user_id TEXT NOT NULL,
+            hermes_session TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_chat_conv_user ON chat_conversations(user_id);
+
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            conversation_id TEXT NOT NULL REFERENCES chat_conversations(id) ON DELETE CASCADE,
+            role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
+            content TEXT NOT NULL,
+            attachments_json TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_chat_msg_conv ON chat_messages(conversation_id);
+
+        CREATE TABLE IF NOT EXISTS chat_feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message_id INTEGER NOT NULL REFERENCES chat_messages(id) ON DELETE CASCADE,
+            rating TEXT NOT NULL CHECK (rating IN ('like', 'dislike')),
+            comment TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE(message_id)
+        );
+    """)
+    conn.close()
+
+
+_init_chat_db()
+
+
+def _init_notifications_table():
+    """Create notifications table if missing."""
+    conn = sqlite3.connect(str(CHAT_DB_PATH))
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS chat_notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT NOT NULL DEFAULT 'info' CHECK (type IN ('cron_complete', 'error', 'info')),
+            title TEXT NOT NULL,
+            body TEXT,
+            read INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_notif_read ON chat_notifications(read);
+    """)
+    conn.close()
+
+
+_init_notifications_table()
+
+
+def _get_chat_db():
+    """Open a read-write connection to the chat DB."""
+    conn = sqlite3.connect(str(CHAT_DB_PATH))
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
+
+
+@app.get("/api/v1/chat/conversations")
+def list_conversations(request: Request):
+    """List conversations for the current user (admin sees all, viewer sees own)."""
+    sess = request.state.session
+    user = sess["user"]
+    role = sess["role"]
+    filter_user = request.query_params.get("filter_user", "")
+
+    conn = _get_chat_db()
+    try:
+        if role == "admin" and filter_user:
+            rows = conn.execute(
+                "SELECT * FROM chat_conversations WHERE user_id = ? ORDER BY updated_at DESC",
+                (filter_user,),
+            ).fetchall()
+        elif role == "admin":
+            rows = conn.execute(
+                "SELECT * FROM chat_conversations ORDER BY updated_at DESC"
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM chat_conversations WHERE user_id = ? ORDER BY updated_at DESC",
+                (user,),
+            ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+@app.post("/api/v1/chat/conversations")
+async def create_conversation(request: Request):
+    """Create a new conversation. Also syncs the previous active conversation."""
+    sess = request.state.session
+    body = await request.json()
+    conv_id = body.get("id", uuid.uuid4().hex[:12])
+    title = body.get("title", "Nova conversa")
+    prev_conv_id = body.get("previous_conversation_id")
+
+    # Sync previous conversation to cerebro if it had messages
+    if prev_conv_id:
+        try:
+            sync_to_cerebro(prev_conv_id)
+            _conv_last_activity.pop(prev_conv_id, None)
+        except Exception:
+            pass
+
+    conn = _get_chat_db()
+    try:
+        hermes_session = f"chat-fin-{conv_id}"
+        now = datetime.now(timezone.utc).isoformat()
+        conn.execute(
+            "INSERT INTO chat_conversations (id, title, user_id, hermes_session, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (conv_id, title, sess["user"], hermes_session, now, now),
+        )
+        conn.commit()
+        return {"id": conv_id, "title": title, "hermes_session": hermes_session}
+    finally:
+        conn.close()
+
+
+@app.patch("/api/v1/chat/conversations/{conv_id}")
+async def update_conversation(conv_id: str, request: Request):
+    """Update conversation title."""
+    sess = request.state.session
+    body = await request.json()
+    title = body.get("title", "")
+
+    conn = _get_chat_db()
+    try:
+        # Check ownership (admin can edit any)
+        row = conn.execute("SELECT user_id FROM chat_conversations WHERE id = ?", (conv_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        if sess["role"] != "admin" and row["user_id"] != sess["user"]:
+            raise HTTPException(status_code=403, detail="Forbidden")
+
+        now = datetime.now(timezone.utc).isoformat()
+        conn.execute(
+            "UPDATE chat_conversations SET title = ?, updated_at = ? WHERE id = ?",
+            (title, now, conv_id),
+        )
+        conn.commit()
+        return {"ok": True}
+    finally:
+        conn.close()
+
+
+@app.delete("/api/v1/chat/conversations/{conv_id}")
+def delete_conversation_api(conv_id: str, request: Request):
+    """Delete a conversation and its messages."""
+    sess = request.state.session
+
+    conn = _get_chat_db()
+    try:
+        row = conn.execute("SELECT user_id FROM chat_conversations WHERE id = ?", (conv_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        if sess["role"] != "admin" and row["user_id"] != sess["user"]:
+            raise HTTPException(status_code=403, detail="Forbidden")
+
+        conn.execute("DELETE FROM chat_messages WHERE conversation_id = ?", (conv_id,))
+        conn.execute("DELETE FROM chat_feedback WHERE message_id NOT IN (SELECT id FROM chat_messages)")
+        conn.execute("DELETE FROM chat_conversations WHERE id = ?", (conv_id,))
+        conn.commit()
+        return {"ok": True}
+    finally:
+        conn.close()
+
+
+@app.get("/api/v1/chat/conversations/{conv_id}/messages")
+def get_conversation_messages(conv_id: str, request: Request):
+    """Get all messages for a conversation."""
+    sess = request.state.session
+
+    conn = _get_chat_db()
+    try:
+        row = conn.execute("SELECT user_id FROM chat_conversations WHERE id = ?", (conv_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        if sess["role"] != "admin" and row["user_id"] != sess["user"]:
+            raise HTTPException(status_code=403, detail="Forbidden")
+
+        messages = conn.execute(
+            """SELECT m.id, m.conversation_id, m.role, m.content, m.attachments_json, m.created_at,
+                      f.rating as feedback_rating
+               FROM chat_messages m
+               LEFT JOIN chat_feedback f ON f.message_id = m.id
+               WHERE m.conversation_id = ?
+               ORDER BY m.created_at ASC""",
+            (conv_id,),
+        ).fetchall()
+
+        result = []
+        for m in messages:
+            msg = dict(m)
+            if msg["attachments_json"]:
+                try:
+                    msg["attachment"] = json.loads(msg["attachments_json"])
+                except Exception:
+                    msg["attachment"] = None
+            else:
+                msg["attachment"] = None
+            del msg["attachments_json"]
+            result.append(msg)
+        return result
+    finally:
+        conn.close()
+
+
+@app.post("/api/v1/chat/messages")
+async def save_message(request: Request):
+    """Save a message to the database. Returns the message ID."""
+    sess = request.state.session
+    body = await request.json()
+    conv_id = body.get("conversation_id")
+    role = body.get("role", "user")
+    content = body.get("content", "")
+    attachment = body.get("attachment")
+
+    if not conv_id or not content:
+        return JSONResponse({"error": "Missing conversation_id or content"}, status_code=400)
+
+    conn = _get_chat_db()
+    try:
+        # Verify conversation exists and user has access
+        row = conn.execute("SELECT user_id FROM chat_conversations WHERE id = ?", (conv_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        if sess["role"] != "admin" and row["user_id"] != sess["user"]:
+            raise HTTPException(status_code=403, detail="Forbidden")
+
+        now = datetime.now(timezone.utc).isoformat()
+        attachments_json = json.dumps(attachment) if attachment else None
+        cursor = conn.execute(
+            "INSERT INTO chat_messages (conversation_id, role, content, attachments_json, created_at) VALUES (?, ?, ?, ?, ?)",
+            (conv_id, role, content, attachments_json, now),
+        )
+        msg_id = cursor.lastrowid
+
+        # Update conversation's updated_at
+        conn.execute("UPDATE chat_conversations SET updated_at = ? WHERE id = ?", (now, conv_id))
+
+        # Auto-title: use first user message
+        if role == "user":
+            msg_count = conn.execute(
+                "SELECT COUNT(*) as cnt FROM chat_messages WHERE conversation_id = ? AND role = 'user'",
+                (conv_id,),
+            ).fetchone()["cnt"]
+            if msg_count == 1:
+                title = content[:50] + ("…" if len(content) > 50 else "")
+                conn.execute("UPDATE chat_conversations SET title = ? WHERE id = ?", (title, conv_id))
+
+        conn.commit()
+        # Track activity for auto-sync
+        _conv_last_activity[conv_id] = time.time()
+        return {"id": msg_id, "created_at": now}
+    finally:
+        conn.close()
+
+
+@app.post("/api/v1/chat/feedback")
+async def save_feedback(request: Request):
+    """Save like/dislike feedback for a message."""
+    body = await request.json()
+    message_id = body.get("message_id")
+    rating = body.get("rating")
+    comment = body.get("comment", "")
+
+    if not message_id or rating not in ("like", "dislike"):
+        return JSONResponse({"error": "Invalid message_id or rating"}, status_code=400)
+
+    conn = _get_chat_db()
+    try:
+        # Verify message exists
+        row = conn.execute("SELECT id FROM chat_messages WHERE id = ?", (message_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Message not found")
+
+        conn.execute(
+            "INSERT OR REPLACE INTO chat_feedback (message_id, rating, comment, created_at) VALUES (?, ?, ?, datetime('now'))",
+            (message_id, rating, comment),
+        )
+        conn.commit()
+        return {"ok": True}
+    finally:
+        conn.close()
+
+
+@app.get("/api/v1/chat/search")
+def search_conversations(request: Request):
+    """Search messages by text content."""
+    sess = request.state.session
+    query = request.query_params.get("q", "").strip()
+    if not query or len(query) < 2:
+        return []
+
+    conn = _get_chat_db()
+    try:
+        search_term = f"%{query}%"
+        if sess["role"] == "admin":
+            rows = conn.execute(
+                """SELECT m.id, m.conversation_id, m.role, m.content, m.created_at,
+                          c.title as conv_title, c.user_id
+                   FROM chat_messages m
+                   JOIN chat_conversations c ON c.id = m.conversation_id
+                   WHERE m.content LIKE ?
+                   ORDER BY m.created_at DESC LIMIT 30""",
+                (search_term,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """SELECT m.id, m.conversation_id, m.role, m.content, m.created_at,
+                          c.title as conv_title, c.user_id
+                   FROM chat_messages m
+                   JOIN chat_conversations c ON c.id = m.conversation_id
+                   WHERE m.content LIKE ? AND c.user_id = ?
+                   ORDER BY m.created_at DESC LIMIT 30""",
+                (search_term, sess["user"]),
+            ).fetchall()
+
+        results = []
+        for r in rows:
+            d = dict(r)
+            # Create snippet around the match
+            content = d["content"]
+            idx = content.lower().find(query.lower())
+            start = max(0, idx - 40)
+            end = min(len(content), idx + len(query) + 40)
+            snippet = ("…" if start > 0 else "") + content[start:end] + ("…" if end < len(content) else "")
+            d["snippet"] = snippet
+            d["content"] = content[:200]  # limit content in search results
+            results.append(d)
+        return results
+    finally:
+        conn.close()
+
+
+@app.get("/api/v1/chat/users")
+def list_chat_users(request: Request):
+    """List users who have conversations (for admin filter dropdown)."""
+    sess = request.state.session
+    if sess["role"] != "admin":
+        return []
+
+    conn = _get_chat_db()
+    try:
+        rows = conn.execute(
+            "SELECT DISTINCT user_id, COUNT(*) as conv_count FROM chat_conversations GROUP BY user_id ORDER BY user_id"
+        ).fetchall()
+        return [{"user_id": r["user_id"], "conv_count": r["conv_count"]} for r in rows]
+    finally:
+        conn.close()
+
+
+# --- Chat V2 Phase 3: Cerebro Sync ---
+
+CEREBRO_CHAT_DIR = Path("/home/hermes/cerebro-financeiro/inbox/chat")
+CEREBRO_CHAT_DIR.mkdir(parents=True, exist_ok=True)
+
+# Track last activity per conversation for auto-sync
+_conv_last_activity: dict[str, float] = {}
+
+
+def sync_to_cerebro(conv_id: str) -> str | None:
+    """Generate a .md summary of a conversation and save to cerebro-financeiro inbox."""
+    conn = _get_chat_db()
+    try:
+        conv = conn.execute("SELECT * FROM chat_conversations WHERE id = ?", (conv_id,)).fetchone()
+        if not conv:
+            return None
+
+        messages = conn.execute(
+            "SELECT role, content, attachments_json, created_at FROM chat_messages WHERE conversation_id = ? ORDER BY created_at ASC",
+            (conv_id,),
+        ).fetchall()
+
+        if not messages:
+            return None
+
+        title = conv["title"] or "Nova conversa"
+        user_id = conv["user_id"]
+        user_name = USERS.get(user_id, {}).get("name", user_id)
+        created = conv["created_at"][:10] if conv["created_at"] else datetime.now().strftime("%Y-%m-%d")
+
+        # Build markdown
+        safe_title = re.sub(r'[^\w\s-]', '', title).strip().replace(' ', '-')[:40]
+        filename = f"{created}-{safe_title}.md"
+        filepath = CEREBRO_CHAT_DIR / filename
+
+        # Collect files
+        arquivos = []
+        msg_lines = []
+        for m in messages:
+            role_label = "👤 Usuário" if m["role"] == "user" else "🤖 Assistente"
+            ts = m["created_at"][11:16] if m["created_at"] and len(m["created_at"]) > 16 else ""
+            content_preview = m["content"][:500] + ("…" if len(m["content"]) > 500 else "")
+            msg_lines.append(f"**{role_label}** ({ts}):\n{content_preview}\n")
+
+            if m["attachments_json"]:
+                try:
+                    att = json.loads(m["attachments_json"])
+                    if att and isinstance(att, dict):
+                        arquivos.append(f"- {att.get('filename', '?')} ({att.get('type', '?')}, {att.get('size', 0)} bytes) → `{att.get('path', '?')}`")
+                except Exception:
+                    pass
+
+        # Build summary section (first user msg + last assistant msg)
+        first_user = next((m["content"][:200] for m in messages if m["role"] == "user"), "")
+        last_assistant = ""
+        for m in reversed(list(messages)):
+            if m["role"] == "assistant":
+                last_assistant = m["content"][:200]
+                break
+
+        md = f"""# {title}
+
+| Campo | Valor |
+|-------|-------|
+| **Data** | {created} |
+| **Participante** | {user_name} ({user_id}) |
+| **Conversa ID** | {conv_id} |
+| **Total mensagens** | {len(list(messages))} |
+
+## Resumo
+
+**Pergunta inicial:** {first_user}
+
+**Última resposta:** {last_assistant}
+
+## Mensagens
+
+{chr(10).join(msg_lines)}
+
+## Arquivos
+
+{chr(10).join(arquivos) if arquivos else "_Nenhum arquivo enviado._"}
+
+---
+_Sincronizado automaticamente pelo Chat V2 em {datetime.now(timezone.utc).isoformat()}_
+"""
+        filepath.write_text(md, encoding="utf-8")
+        return str(filepath)
+
+    finally:
+        conn.close()
+
+
+@app.post("/api/v1/chat/conversations/{conv_id}/sync")
+def sync_conversation(conv_id: str, request: Request):
+    """Manually sync a conversation to cerebro-financeiro."""
+    sess = request.state.session
+    conn = _get_chat_db()
+    try:
+        row = conn.execute("SELECT user_id FROM chat_conversations WHERE id = ?", (conv_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        if sess["role"] != "admin" and row["user_id"] != sess["user"]:
+            raise HTTPException(status_code=403, detail="Forbidden")
+    finally:
+        conn.close()
+
+    path = sync_to_cerebro(conv_id)
+    if path:
+        return {"ok": True, "path": path}
+    return JSONResponse({"error": "No messages to sync"}, status_code=400)
+
+
+def _check_inactive_syncs():
+    """Background check: sync conversations inactive for 5+ minutes."""
+    now = time.time()
+    to_sync = []
+    for cid, last_ts in list(_conv_last_activity.items()):
+        if now - last_ts >= 300:  # 5 minutes
+            to_sync.append(cid)
+            del _conv_last_activity[cid]
+    for cid in to_sync:
+        try:
+            sync_to_cerebro(cid)
+        except Exception:
+            pass
+
+
+def _start_sync_checker():
+    """Start background thread that checks for inactive conversations."""
+    def _checker():
+        while True:
+            time.sleep(60)
+            try:
+                _check_inactive_syncs()
+            except Exception:
+                pass
+    t = threading.Thread(target=_checker, daemon=True)
+    t.start()
+
+
+_start_sync_checker()
+
+
+# --- Notifications Endpoints (Phase 4) ---
+
+@app.get("/api/v1/chat/notifications")
+def list_notifications(request: Request):
+    """List unread + recent notifications."""
+    conn = _get_chat_db()
+    try:
+        rows = conn.execute(
+            "SELECT id, type, title, body, read, created_at FROM chat_notifications ORDER BY created_at DESC LIMIT 50"
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+@app.get("/api/v1/chat/notifications/unread-count")
+def notification_unread_count(request: Request):
+    """Return count of unread notifications."""
+    conn = _get_chat_db()
+    try:
+        row = conn.execute("SELECT COUNT(*) as cnt FROM chat_notifications WHERE read = 0").fetchone()
+        return {"count": row["cnt"]}
+    finally:
+        conn.close()
+
+
+@app.post("/api/v1/chat/notifications/{notif_id}/read")
+def mark_notification_read(notif_id: int, request: Request):
+    """Mark a single notification as read."""
+    conn = _get_chat_db()
+    try:
+        conn.execute("UPDATE chat_notifications SET read = 1 WHERE id = ?", (notif_id,))
+        conn.commit()
+        return {"ok": True}
+    finally:
+        conn.close()
+
+
+@app.post("/api/v1/chat/notifications/read-all")
+def mark_all_notifications_read(request: Request):
+    """Mark all notifications as read."""
+    conn = _get_chat_db()
+    try:
+        conn.execute("UPDATE chat_notifications SET read = 1 WHERE read = 0")
+        conn.commit()
+        return {"ok": True}
+    finally:
+        conn.close()
+
+
+@app.post("/api/v1/chat/notifications")
+async def create_notification(request: Request):
+    """Create a notification (for cron results, errors, etc.)."""
+    body = await request.json()
+    notif_type = body.get("type", "info")
+    title = body.get("title", "")
+    notif_body = body.get("body", "")
+    if not title:
+        return JSONResponse({"error": "Title required"}, status_code=400)
+    if notif_type not in ("cron_complete", "error", "info"):
+        notif_type = "info"
+
+    conn = _get_chat_db()
+    try:
+        now = datetime.now(timezone.utc).isoformat()
+        cursor = conn.execute(
+            "INSERT INTO chat_notifications (type, title, body, created_at) VALUES (?, ?, ?, ?)",
+            (notif_type, title, notif_body, now),
+        )
+        conn.commit()
+        return {"id": cursor.lastrowid, "ok": True}
+    finally:
+        conn.close()
 
 
 # --- Static files & frontend ---
