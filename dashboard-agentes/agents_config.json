@@ -1,0 +1,46 @@
+{
+  "agents": [
+    {
+      "name": "Big Julio",
+      "profile": "default",
+      "role": "orquestrador",
+      "model": "claude-opus-4.6",
+      "operator": "Rafael",
+      "workspace": "/home/hermes",
+      "description": "Orquestrador central. Arquitetura agêntica + operação de TI.",
+      "systems": [
+        {"name": "Telegram", "icon": "💬", "status": "connected"},
+        {"name": "GitHub", "icon": "🐙", "status": "connected"}
+      ]
+    },
+    {
+      "name": "JI - Projetos & Marketing",
+      "profile": "ji-projetos",
+      "role": "área",
+      "model": "claude-opus-4.6",
+      "operator": "Jéssica",
+      "workspace": "/home/hermes/cerebro-projetos-marketing",
+      "description": "Relatório diário, CRM Office, H-TALKS, Trello.",
+      "systems": [
+        {"name": "Telegram", "icon": "💬", "status": "connected"},
+        {"name": "CRM Imóvel Office", "icon": "🏠", "status": "connected"},
+        {"name": "H-TALKS", "icon": "📞", "status": "connected"},
+        {"name": "Trello", "icon": "📋", "status": "connected"}
+      ]
+    },
+    {
+      "name": "JI - Financeiro",
+      "profile": "ji-financeiro",
+      "role": "área",
+      "model": "claude-opus-4.6",
+      "operator": "Karen",
+      "workspace": "/home/hermes",
+      "description": "Conferência DIMOB, SICCAD, SharePoint.",
+      "systems": [
+        {"name": "Telegram", "icon": "💬", "status": "connected"},
+        {"name": "SICCAD", "icon": "📊", "status": "pending"},
+        {"name": "SharePoint", "icon": "📁", "status": "pending"}
+      ]
+    }
+  ]
+}

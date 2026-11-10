@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Julio Imóveis — Gestão de Agentes</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: #1a1f2e;
+      --bg-card-hover: #222840;
+      --border: #2a3042;
+      --text-primary: #e5e7eb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.3);
+      --green: #22c55e;
+      --green-glow: rgba(34, 197, 94, 0.3);
+      --red: #ef4444;
+      --red-glow: rgba(239, 68, 68, 0.3);
+      --yellow: #eab308;
+      --yellow-glow: rgba(234, 179, 8, 0.3);
+      --orange: #f97316;
+      --purple: #a855f7;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-logo { font-size: 24px; }
+    .header h1 { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+    .header h1 span { color: var(--text-secondary); font-weight: 400; }
+    .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .btn-refresh {
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text-primary); padding: 8px 16px; border-radius: 8px;
+      cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-refresh:hover { background: var(--bg-card-hover); border-color: var(--accent); }
+    .btn-refresh.loading .refresh-icon { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .last-update { font-size: 12px; color: var(--text-muted); }
+
+    /* Auto-refresh indicator (T3.2) */
+    .auto-refresh-indicator {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .auto-refresh-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); display: inline-block;
+    }
+    .auto-refresh-dot.paused { background: var(--yellow); }
+
+    /* User badge */
+    .user-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      padding: 6px 14px; border-radius: 8px; font-size: 12px;
+    }
+    .user-badge .role-tag {
+      font-size: 10px; padding: 2px 6px; border-radius: 4px;
+      text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .role-tag.admin { background: rgba(59,130,246,0.2); color: var(--accent); }
+    .role-tag.viewer { background: rgba(34,197,94,0.2); color: var(--green); }
+    .btn-logout {
+      background: none; border: 1px solid var(--border);
+      color: var(--text-muted); padding: 6px 12px; border-radius: 6px;
+      cursor: pointer; font-size: 11px; transition: all 0.2s;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+    /* Main layout */
+    .main { max-width: 1440px; margin: 0 auto; padding: 24px 32px; }
+
+    /* Metrics cards */
+    .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .metric-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; transition: all 0.2s;
+    }
+    .metric-card:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+    .metric-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px; }
+    .metric-value { font-size: 32px; font-weight: 700; color: var(--text-primary); }
+    .metric-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .metric-icon { float: right; font-size: 28px; opacity: 0.5; }
+
+    /* Two-column layout */
+    .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+    /* Sections */
+    .section {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .section-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+      color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .section-body { padding: 16px 20px; }
+
+    /* Agent Map */
+    .agent-map { position: relative; min-height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .agent-card {
+      background: var(--bg-secondary); border: 2px solid var(--border);
+      border-radius: var(--radius); padding: 20px; text-align: center;
+      transition: all 0.3s; cursor: pointer; position: relative;
+    }
+    .agent-card:hover { border-color: var(--accent); box-shadow: 0 0 30px var(--accent-glow); transform: translateY(-2px); }
+    .agent-card.orchestrator {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(59,130,246,0.1) 100%);
+      margin-bottom: 40px;
+    }
+    .agent-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .agent-role { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
+    .agent-model { font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+    .agent-operator { font-size: 12px; color: var(--text-secondary); }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .status-online { background: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+    .status-offline { background: var(--text-muted); }
+    .agent-children { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+    .agent-children .agent-card { flex: 1; max-width: 260px; min-width: 200px; }
+    .connections { position: relative; width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
+    .connection-line { width: 2px; height: 40px; background: linear-gradient(to bottom, var(--accent), var(--border)); }
+    .agent-stats { display: flex; gap: 12px; justify-content: center; margin-top: 10px; }
+    .agent-stat { font-size: 11px; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 6px; }
+
+    /* Crons list */
+    .cron-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .cron-item:last-child { border-bottom: none; }
+    .cron-status { width: 10px; height: 10px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; }
+    .cron-status.ok { background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+    .cron-status.fail { background: var(--red); box-shadow: 0 0 6px var(--red-glow); }
+    .cron-status.never { background: var(--yellow); box-shadow: 0 0 6px var(--yellow-glow); }
+    .cron-info { flex: 1; }
+    .cron-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .cron-schedule { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .cron-agent-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(59,130,246,0.15); color: var(--accent); margin-left: 8px; }
+    .cron-next { font-size: 11px; color: var(--text-secondary); text-align: right; }
+
+    /* Systems */
+    .system-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .system-item:last-child { border-bottom: none; }
+    .system-icon { font-size: 18px; margin-right: 10px; }
+    .system-name { flex: 1; font-size: 13px; color: var(--text-primary); }
+    .system-agent { font-size: 11px; color: var(--text-muted); margin-right: 12px; }
+    .system-status { font-size: 14px; }
+
+    /* Activity */
+    .activity-item { display: flex; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 10px; }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-time { font-size: 11px; color: var(--text-muted); min-width: 90px; flex-shrink: 0; }
+    .activity-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+    .activity-badge.cron { background: rgba(168,85,247,0.15); color: var(--purple); }
+    .activity-badge.telegram { background: rgba(59,130,246,0.15); color: var(--accent); }
+    .activity-badge.subagent { background: rgba(249,115,22,0.15); color: var(--orange); }
+    .activity-badge.error { background: rgba(239,68,68,0.15); color: var(--red); }
+    .activity-badge.other { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+    .activity-title { font-size: 12px; color: var(--text-secondary); flex: 1; }
+    .activity-agent { font-size: 11px; color: var(--text-muted); min-width: 70px; text-align: right; }
+
+    /* Bottom grid */
+    .bottom-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-bottom: 24px; }
+
+    /* Token chart section */
+    .chart-section { margin-bottom: 24px; }
+    .chart-container { position: relative; height: 280px; padding: 10px; }
+
+    /* Timeline section */
+    .timeline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+    /* Timeline items */
+    .timeline-item {
+      display: flex; gap: 12px; padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .timeline-icon.session { background: rgba(59,130,246,0.15); }
+    .timeline-icon.cron { background: rgba(168,85,247,0.15); }
+    .timeline-icon.cron_exec { background: rgba(34,197,94,0.15); }
+    .timeline-icon.incident { background: rgba(239,68,68,0.15); }
+    .timeline-icon.subagent { background: rgba(249,115,22,0.15); }
+    .timeline-body { flex: 1; min-width: 0; }
+    .timeline-title { font-size: 12px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .timeline-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .timeline-meta span { white-space: nowrap; }
+
+    /* Delegations */
+    .deleg-item {
+      padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .deleg-item:last-child { border-bottom: none; }
+    .deleg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .deleg-id { font-size: 12px; font-family: monospace; color: var(--accent); }
+    .deleg-state { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+    .deleg-state.completed { background: rgba(34,197,94,0.15); color: var(--green); }
+    .deleg-state.running { background: rgba(59,130,246,0.15); color: var(--accent); }
+    .deleg-state.failed { background: rgba(239,68,68,0.15); color: var(--red); }
+    .deleg-goal { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .deleg-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Skills tags */
+    .skills-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .skill-tag {
+      font-size: 11px; padding: 3px 10px; border-radius: 6px;
+      background: rgba(255,255,255,0.06); color: var(--text-secondary);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 999;
+      opacity: 0; visibility: hidden; transition: all 0.3s;
+    }
+    .sidebar-overlay.active { opacity: 1; visibility: visible; }
+    .sidebar {
+      position: fixed; top: 0; right: -520px; width: 500px; height: 100vh;
+      background: var(--bg-secondary); border-left: 1px solid var(--border);
+      z-index: 1000; overflow-y: auto; transition: right 0.3s ease;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+    }
+    .sidebar.active { right: 0; }
+    .sidebar-header {
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; background: var(--bg-secondary); z-index: 10;
+    }
+    .sidebar-title { font-size: 18px; font-weight: 700; }
+    .sidebar-close {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text-primary); cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .sidebar-close:hover { background: var(--bg-card-hover); border-color: var(--red); color: var(--red); }
+    .sidebar-content { padding: 20px 24px; }
+    .sidebar-section { margin-bottom: 24px; }
+    .sidebar-section-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-muted); margin-bottom: 12px; font-weight: 600;
+    }
+    .sidebar-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .sidebar-info-item {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px;
+    }
+    .sidebar-info-label { font-size: 10px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+    .sidebar-info-value { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-top: 4px; }
+    .sidebar-info-value.small { font-size: 11px; font-weight: 400; word-break: break-all; }
+
+    /* Sidebar sessions list */
+    .sidebar-session {
+      padding: 10px 12px; border-radius: 8px; margin-bottom: 6px;
+      background: var(--bg-card); border: 1px solid var(--border);
+    }
+    .sidebar-session-title { font-size: 12px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-session-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* Sidebar cron list */
+    .sidebar-cron {
+      display: flex; align-items: center; gap: 10px; padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .sidebar-cron:last-child { border-bottom: none; }
+
+    /* Sidebar incident */
+    .sidebar-incident {
+      padding: 8px 12px; border-radius: 8px; margin-bottom: 6px;
+      background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.15);
+    }
+    .sidebar-incident-title { font-size: 12px; color: var(--red); font-weight: 600; }
+    .sidebar-incident-error { font-size: 11px; color: var(--text-muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Pulse animation */
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .status-online { animation: pulse 2s ease-in-out infinite; }
+
+    /* ===== TOKEN MONITOR ===== */
+    .usage-bar-container { margin-bottom: 16px; }
+    .usage-bar-label {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 6px; font-size: 13px;
+    }
+    .usage-bar-label .label-left { font-weight: 600; color: var(--text-primary); }
+    .usage-bar-label .label-right { font-size: 12px; color: var(--text-muted); }
+    .usage-bar-track {
+      height: 24px; background: rgba(255,255,255,0.06); border-radius: 12px;
+      overflow: hidden; position: relative;
+    }
+    .usage-bar-fill {
+      height: 100%; border-radius: 12px; transition: width 0.8s ease;
+      display: flex; align-items: center; justify-content: flex-end; padding-right: 10px;
+      font-size: 11px; font-weight: 700; color: #fff; min-width: 40px;
+    }
+    .usage-bar-fill.green { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    .usage-bar-fill.yellow { background: linear-gradient(90deg, #eab308, #ca8a04); }
+    .usage-bar-fill.red { background: linear-gradient(90deg, #ef4444, #dc2626); }
+
+    .usage-alert {
+      border-radius: 8px; padding: 12px 16px; font-size: 13px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .usage-alert.green { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
+    .usage-alert.yellow { background: rgba(234,179,8,0.1); border: 1px solid rgba(234,179,8,0.3); color: var(--yellow); }
+    .usage-alert.red { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+
+    .agent-usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+    .agent-usage-card {
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .agent-usage-name { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+    .agent-usage-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+    .agent-usage-row .lbl { color: var(--text-muted); }
+    .agent-usage-row .val { color: var(--text-secondary); font-weight: 600; }
+
+    .hourly-heatmap-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .hourly-grid {
+      display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px;
+    }
+    .hourly-cell {
+      aspect-ratio: 1; border-radius: 4px; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: rgba(255,255,255,0.6); cursor: default;
+      transition: transform 0.15s;
+    }
+    .hourly-cell:hover { transform: scale(1.3); z-index: 2; }
+    .hourly-labels {
+      display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px;
+      margin-top: 4px;
+    }
+    .hourly-label { text-align: center; font-size: 9px; color: var(--text-muted); }
+
+    /* Viewer mode: hide admin-only sections (T3.3) */
+    body.viewer-mode .admin-only { display: none !important; }
+
+    /* Viewer simplified cards */
+    .viewer-summary {
+      display: none;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
+    }
+    body.viewer-mode .viewer-summary { display: block; }
+    .viewer-summary h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text-secondary); }
+    .viewer-agent-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .viewer-agent-card {
+      background: var(--bg-secondary); border: 2px solid var(--border);
+      border-radius: var(--radius); padding: 20px; transition: all 0.3s;
+    }
+    .viewer-agent-card.online { border-color: var(--green); }
+    .viewer-agent-card.offline { border-color: var(--text-muted); }
+    .viewer-agent-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .viewer-agent-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+    .viewer-agent-status {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    }
+    .viewer-agent-status.online { background: rgba(34,197,94,0.15); color: var(--green); }
+    .viewer-agent-status.offline { background: rgba(107,114,128,0.15); color: var(--text-muted); }
+    .viewer-agent-meta { margin-top: 12px; font-size: 12px; color: var(--text-secondary); }
+    .viewer-agent-meta div { margin-bottom: 4px; }
+
+    /* ===== RESPONSIVE MOBILE (T3.4) ===== */
+    @media (max-width: 900px) {
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .content-grid, .bottom-grid, .timeline-grid { grid-template-columns: 1fr; }
+      .sidebar { width: 100%; right: -100%; }
+      .header { padding: 12px 16px; }
+      .main { padding: 16px; }
+    }
+
+    @media (max-width: 480px) {
+      .metrics-grid { grid-template-columns: 1fr; gap: 10px; }
+      .metric-card { padding: 14px; }
+      .metric-value { font-size: 24px; }
+      .metric-icon { font-size: 22px; }
+      .header h1 { font-size: 14px; }
+      .header h1 span { display: none; }
+      .main { padding: 12px; }
+      .section-body { padding: 12px; }
+      .section-header { padding: 12px; font-size: 12px; }
+      .agent-card { padding: 14px; }
+      .agent-name { font-size: 14px; }
+      .agent-children { flex-direction: column; align-items: stretch; }
+      .agent-children .agent-card { max-width: none; }
+      .content-grid, .bottom-grid, .timeline-grid { gap: 12px; }
+      .chart-container { height: 200px; }
+      .cron-next { display: none; }
+      .activity-time { min-width: 60px; font-size: 10px; }
+      .activity-agent { display: none; }
+      .user-badge { padding: 4px 8px; font-size: 11px; }
+      .btn-refresh { padding: 6px 10px; font-size: 12px; }
+      .btn-logout { padding: 4px 8px; font-size: 10px; }
+      .viewer-agent-cards { grid-template-columns: 1fr; }
+
+      /* Sidebar fullscreen on mobile */
+      .sidebar {
+        width: 100vw; height: 100vh;
+        right: -100vw;
+      }
+      .sidebar.active { right: 0; }
+    }
+
+    @media (max-width: 375px) {
+      .header-right { gap: 6px; }
+      .auto-refresh-indicator { display: none; }
+      .metric-label { font-size: 10px; }
+      .metric-value { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="header-logo">🏢</span>
+    <h1>Julio Imóveis <span>— Gestão de Agentes</span></h1>
+  </div>
+  <div class="header-right">
+    <div class="auto-refresh-indicator" id="autoRefreshIndicator">
+      <span class="auto-refresh-dot" id="autoRefreshDot"></span>
+      <span id="autoRefreshText">Auto-refresh 60s</span>
+    </div>
+    <span class="last-update" id="lastUpdate"></span>
+    <button class="btn-refresh" id="btnRefresh" onclick="refreshAll()">
+      <span class="refresh-icon">⟳</span> Atualizar
+    </button>
+    <div class="user-badge" id="userBadge" style="display:none">
+      <span id="userName"></span>
+      <span class="role-tag" id="userRole"></span>
+    </div>
+    <button class="btn-logout" onclick="window.location.href='/api/v1/logout'">Sair</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Viewer Summary (T3.3 - shown only for viewer role) -->
+  <div class="viewer-summary" id="viewerSummary">
+    <h2>📋 Resumo dos Agentes</h2>
+    <div class="viewer-agent-cards" id="viewerAgentCards"></div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics-grid" id="metricsGrid">
+    <div class="metric-card">
+      <span class="metric-icon">🤖</span>
+      <div class="metric-label">Agentes Ativos</div>
+      <div class="metric-value" id="metricAgents">—</div>
+      <div class="metric-sub" id="metricAgentsSub"></div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">🧠</span>
+      <div class="metric-label">Skills Carregadas</div>
+      <div class="metric-value" id="metricSkills">—</div>
+      <div class="metric-sub">nos 3 profiles</div>
+    </div>
+    <div class="metric-card admin-only">
+      <span class="metric-icon">⏰</span>
+      <div class="metric-label">Crons Ativos</div>
+      <div class="metric-value" id="metricCrons">—</div>
+      <div class="metric-sub" id="metricCronsSub"></div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">💬</span>
+      <div class="metric-label">Sessões Hoje</div>
+      <div class="metric-value" id="metricSessions">—</div>
+      <div class="metric-sub" id="metricSessionsSub"></div>
+    </div>
+  </div>
+
+  <!-- Map + Crons -->
+  <div class="content-grid">
+    <div class="section">
+      <div class="section-header">🗺️ Mapa de Agentes</div>
+      <div class="section-body">
+        <div class="agent-map" id="agentMap"></div>
+      </div>
+    </div>
+    <div class="section admin-only">
+      <div class="section-header">⏰ Crons & Schedules</div>
+      <div class="section-body" id="cronsList"></div>
+    </div>
+  </div>
+
+  <!-- Token Usage Monitor -->
+  <div id="tokenMonitorSection" style="margin-bottom:24px">
+    <div class="section">
+      <div class="section-header">⚡ Monitor de Tokens — Uso em Tempo Real</div>
+      <div class="section-body">
+        <!-- Account-level session & week -->
+        <div id="usageLiveBars" style="margin-bottom:20px"></div>
+        <!-- Recommendation alert -->
+        <div id="usageAlert" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:13px"></div>
+        <!-- Per-agent usage -->
+        <div id="usageByAgent" style="margin-bottom:20px"></div>
+        <!-- Hourly heatmap -->
+        <div id="usageHourly" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Token Chart (admin only) -->
+  <div class="chart-section admin-only">
+    <div class="section">
+      <div class="section-header">📊 Uso de Tokens — Últimos 7 Dias</div>
+      <div class="section-body">
+        <div class="chart-container">
+          <canvas id="tokenChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline + Delegations (admin only) -->
+  <div class="timeline-grid admin-only">
+    <div class="section">
+      <div class="section-header">🕐 Timeline de Atividade</div>
+      <div class="section-body" id="timelineList" style="max-height:500px;overflow-y:auto"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">🚀 Delegações Async</div>
+      <div class="section-body" id="delegationsList" style="max-height:500px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- Systems + Activity -->
+  <div class="bottom-grid admin-only">
+    <div class="section">
+      <div class="section-header">🔌 Sistemas Conectados</div>
+      <div class="section-body" id="systemsList"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">📋 Atividade Recente</div>
+      <div class="section-body" id="activityList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span class="sidebar-title" id="sidebarTitle">Agente</span>
+    <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+  </div>
+  <div class="sidebar-content" id="sidebarContent">
+    <!-- Populated dynamically -->
+  </div>
+</div>
+
+<script>
+const API = '/api/v1';
+let loading = false;
+let tokenChart = null;
+let cachedAgents = [];
+let currentRole = 'admin';
+let autoRefreshTimer = null;
+const AUTO_REFRESH_INTERVAL = 60000; // 60s
+
+async function fetchJSON(path) {
+  const res = await fetch(API + path);
+  if (res.status === 401) {
+    window.location.href = '/login';
+    return null;
+  }
+  return res.json();
+}
+
+// ===== AUTH: Load user info (T3.1) =====
+
+async function loadUserInfo() {
+  try {
+    const data = await fetchJSON('/me');
+    if (!data) return;
+    currentRole = data.role;
+    document.getElementById('userName').textContent = data.name;
+    const roleEl = document.getElementById('userRole');
+    roleEl.textContent = data.role;
+    roleEl.className = 'role-tag ' + data.role;
+    document.getElementById('userBadge').style.display = 'flex';
+
+    // Apply viewer mode (T3.3)
+    if (data.role === 'viewer') {
+      document.body.classList.add('viewer-mode');
+    } else {
+      document.body.classList.remove('viewer-mode');
+    }
+  } catch (e) {
+    console.error('Failed to load user info:', e);
+  }
+}
+
+function formatTime(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts * 1000);
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function formatDateStr(s) {
+  if (!s) return '—';
+  try {
+    const d = new Date(s);
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(d.getDate())}/${pad(d.getMonth()+1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } catch { return s; }
+}
+
+function formatTokens(n) {
+  if (!n) return '0';
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(0) + 'K';
+  return String(n);
+}
+
+function formatCost(n) {
+  if (!n) return '$0.00';
+  return '$' + n.toFixed(2);
+}
+
+function formatDuration(secs) {
+  if (!secs) return '—';
+  if (secs < 60) return Math.round(secs) + 's';
+  if (secs < 3600) return Math.round(secs / 60) + 'min';
+  return (secs / 3600).toFixed(1) + 'h';
+}
+
+function shortName(profile) {
+  const map = { 'default': 'Big Julio', 'ji-projetos': 'P&M', 'ji-financeiro': 'Fin.' };
+  return map[profile] || profile;
+}
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const diff = (Date.now() / 1000) - ts;
+  if (diff < 60) return 'agora';
+  if (diff < 3600) return Math.floor(diff / 60) + ' min atrás';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h atrás';
+  return Math.floor(diff / 86400) + 'd atrás';
+}
+
+// ===== RENDERERS =====
+
+function renderMetrics(data) {
+  document.getElementById('metricAgents').textContent = data.agents_active;
+  document.getElementById('metricAgentsSub').textContent = `de ${data.agents_total} configurados`;
+  document.getElementById('metricSkills').textContent = data.total_skills;
+  document.getElementById('metricCrons').textContent = data.active_crons;
+  document.getElementById('metricCronsSub').textContent = 'programados';
+  document.getElementById('metricSessions').textContent = data.sessions_today;
+  document.getElementById('metricSessionsSub').textContent = data.messages_today > 0 ? `${data.messages_today} msgs` : 'hoje';
+}
+
+function renderAgentMap(agents) {
+  cachedAgents = agents;
+  const map = document.getElementById('agentMap');
+  const orch = agents.find(a => a.role === 'orquestrador');
+  const children = agents.filter(a => a.role !== 'orquestrador');
+
+  let html = '';
+  if (orch) {
+    html += `
+      <div class="agent-card orchestrator" onclick="openSidebar('${orch.profile}')">
+        <div class="agent-name"><span class="status-dot status-${orch.status}"></span>${orch.name}</div>
+        <div class="agent-role">${orch.role}</div>
+        ${currentRole === 'admin' ? `<div class="agent-model">${orch.model}</div>` : ''}
+        ${currentRole === 'admin' ? `<div class="agent-operator">👤 ${orch.operator}</div>` : ''}
+        <div class="agent-stats">
+          <span class="agent-stat">🧠 ${orch.skills_count} skills</span>
+          ${currentRole === 'admin' ? `<span class="agent-stat">⏰ ${orch.crons_count} crons</span>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  html += '<div class="connections"><div class="connection-line"></div></div>';
+  html += '<div class="agent-children">';
+  for (const agent of children) {
+    html += `
+      <div class="agent-card" onclick="openSidebar('${agent.profile}')">
+        <div class="agent-name"><span class="status-dot status-${agent.status}"></span>${agent.name}</div>
+        <div class="agent-role">${agent.role}</div>
+        ${currentRole === 'admin' ? `<div class="agent-model">${agent.model}</div>` : ''}
+        ${currentRole === 'admin' ? `<div class="agent-operator">👤 ${agent.operator}</div>` : ''}
+        <div class="agent-stats">
+          <span class="agent-stat">🧠 ${agent.skills_count} skills</span>
+          ${currentRole === 'admin' ? `<span class="agent-stat">⏰ ${agent.crons_count} crons</span>` : ''}
+        </div>
+      </div>
+    `;
+  }
+  html += '</div>';
+  map.innerHTML = html;
+}
+
+// ===== VIEWER SUMMARY (T3.3) =====
+
+function renderViewerSummary(agents, metrics) {
+  const el = document.getElementById('viewerAgentCards');
+  let html = '';
+  for (const a of agents) {
+    const statusLabel = a.status === 'online' ? '🟢 Ativo' : '🔴 Inativo';
+    const statusClass = a.status;
+    html += `
+      <div class="viewer-agent-card ${statusClass}">
+        <div class="viewer-agent-name">${a.name}</div>
+        <div class="viewer-agent-desc">${a.description || ''}</div>
+        <div class="viewer-agent-status ${statusClass}">
+          <span class="status-dot status-${statusClass}"></span>
+          ${statusLabel}
+        </div>
+        <div class="viewer-agent-meta">
+          <div>📊 ${a.skills_count} skills carregadas</div>
+          <div>🕐 Última atividade: ${a.last_activity ? timeAgo(a.last_activity) : 'sem registro'}</div>
+          ${a.last_title ? `<div>📝 "${a.last_title}"</div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+  el.innerHTML = html;
+}
+
+function renderCrons(crons) {
+  const el = document.getElementById('cronsList');
+  if (!crons.length) { el.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Nenhum cron configurado</div>'; return; }
+  let html = '';
+  for (const c of crons) {
+    const statusClass = c.last_status === 'ok' ? 'ok' : (c.last_status === null ? 'never' : 'fail');
+    html += `
+      <div class="cron-item">
+        <div class="cron-status ${statusClass}"></div>
+        <div class="cron-info">
+          <div class="cron-name">${c.name}<span class="cron-agent-badge">${shortName(c.profile)}</span></div>
+          <div class="cron-schedule">${c.schedule}</div>
+        </div>
+        <div class="cron-next">
+          <div>próx: ${formatDateStr(c.next_run_at)}</div>
+          ${c.last_run_at ? `<div style="color:var(--text-muted)">últ: ${formatDateStr(c.last_run_at)}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+  el.innerHTML = html;
+}
+
+function renderSystems(systems) {
+  const el = document.getElementById('systemsList');
+  let html = '';
+  for (const s of systems) {
+    const statusIcon = s.status === 'connected' ? '✅' : '⚪';
+    html += `
+      <div class="system-item">
+        <span class="system-icon">${s.icon}</span>
+        <span class="system-name">${s.name}</span>
+        <span class="system-agent">${shortName(s.profile)}</span>
+        <span class="system-status">${statusIcon}</span>
+      </div>
+    `;
+  }
+  el.innerHTML = html;
+}
+
+function renderActivity(activities) {
+  const el = document.getElementById('activityList');
+  if (!activities.length) { el.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Nenhuma atividade recente</div>'; return; }
+  let html = '';
+  for (const a of activities.slice(0, 20)) {
+    const badgeClass = a.source === 'cron' ? 'cron' : (a.source === 'telegram' ? 'telegram' : (a.source === 'subagent' ? 'subagent' : 'other'));
+    html += `
+      <div class="activity-item">
+        <span class="activity-time">${formatTime(a.timestamp)}</span>
+        <span class="activity-badge ${badgeClass}">${a.source}</span>
+        <span class="activity-title">${a.title || '—'}</span>
+        <span class="activity-agent">${shortName(a.profile)}</span>
+      </div>
+    `;
+  }
+  el.innerHTML = html;
+}
+
+// ===== FASE 2: TOKEN CHART =====
+
+function renderTokenChart(data) {
+  if (currentRole === 'viewer') return; // skip for viewers
+  const canvas = document.getElementById('tokenChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const labels = data.days.map(d => {
+    const parts = d.split('-');
+    return parts[2] + '/' + parts[1];
+  });
+
+  const colors = {
+    'default': { bg: 'rgba(59,130,246,0.6)', border: '#3b82f6' },
+    'ji-projetos': { bg: 'rgba(168,85,247,0.6)', border: '#a855f7' },
+    'ji-financeiro': { bg: 'rgba(249,115,22,0.6)', border: '#f97316' },
+  };
+
+  const datasets = [];
+  for (const [profile, info] of Object.entries(data.agents)) {
+    const c = colors[profile] || { bg: 'rgba(255,255,255,0.3)', border: '#fff' };
+    datasets.push({
+      label: info.name,
+      data: data.days.map(d => Math.round((info.daily[d]?.total || 0) / 1000)),
+      backgroundColor: c.bg,
+      borderColor: c.border,
+      borderWidth: 1,
+      borderRadius: 4,
+    });
+  }
+
+  if (tokenChart) tokenChart.destroy();
+  tokenChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#9ca3af', font: { size: 11 } }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const profile = Object.keys(data.agents)[context.datasetIndex];
+              const day = data.days[context.dataIndex];
+              const info = data.agents[profile].daily[day];
+              return `${context.dataset.label}: ${formatTokens(info?.total || 0)} tokens — ${formatCost(info?.cost || 0)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          ticks: { color: '#6b7280' },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+        },
+        y: {
+          stacked: true,
+          ticks: {
+            color: '#6b7280',
+            callback: v => v + 'K',
+          },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          title: { display: true, text: 'Tokens (K)', color: '#6b7280' },
+        }
+      }
+    }
+  });
+}
+
+// ===== FASE 2: TIMELINE =====
+
+function renderTimeline(events) {
+  const el = document.getElementById('timelineList');
+  if (!events.length) { el.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Nenhum evento</div>'; return; }
+
+  const iconMap = {
+    session: { telegram: '💬', cron: '⏰', subagent: '🤖', unknown: '📄' },
+    cron_exec: { cron: '⚙️' },
+    incident: { error: '🚨' },
+  };
+
+  let html = '';
+  for (const e of events) {
+    const icon = iconMap[e.type]?.[e.subtype] || iconMap[e.type]?.['unknown'] || '📌';
+    const typeClass = e.subtype === 'error' ? 'incident' : (e.subtype === 'cron' && e.type === 'cron_exec' ? 'cron_exec' : e.subtype);
+
+    let meta = `<span>${shortName(e.profile)}</span>`;
+    meta += `<span>${timeAgo(e.timestamp)}</span>`;
+    if (e.tokens) meta += `<span>${formatTokens(e.tokens)} tok</span>`;
+    if (e.cost_usd) meta += `<span>${formatCost(e.cost_usd)}</span>`;
+    if (e.status && e.type === 'cron_exec') meta += `<span>${e.status}</span>`;
+    if (e.error) meta += `<span style="color:var(--red)">erro</span>`;
+
+    html += `
+      <div class="timeline-item">
+        <div class="timeline-icon ${typeClass}">${icon}</div>
+        <div class="timeline-body">
+          <div class="timeline-title">${e.title}</div>
+          <div class="timeline-meta">${meta}</div>
+        </div>
+      </div>
+    `;
+  }
+  el.innerHTML = html;
+}
+
+// ===== FASE 2: DELEGATIONS =====
+
+function renderDelegations(delegations) {
+  const el = document.getElementById('delegationsList');
+  if (!delegations.length) { el.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Nenhuma delegação</div>'; return; }
+
+  let html = '';
+  for (const d of delegations) {
+    const stateClass = d.state === 'completed' ? 'completed' : (d.state === 'running' ? 'running' : 'failed');
+    html += `
+      <div class="deleg-item">
+        <div class="deleg-header">
+          <span class="deleg-id">${d.delegation_id}</span>
+          <span class="deleg-state ${stateClass}">${d.state}</span>
+        </div>
+        <div class="deleg-goal" title="${d.goal}">${d.goal || '—'}</div>
+        <div class="deleg-meta">
+          ${shortName(d.profile)} · ${formatTime(d.dispatched_at)}
+          ${d.duration ? ` · ${formatDuration(d.duration)}` : ''}
+          · entrega: ${d.delivery_state || '—'}
+        </div>
+      </div>
+    `;
+  }
+  el.innerHTML = html;
+}
+
+// ===== FASE 2: SIDEBAR =====
+
+async function openSidebar(profile) {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const content = document.getElementById('sidebarContent');
+  const titleEl = document.getElementById('sidebarTitle');
+
+  // For viewers, show simplified sidebar
+  if (currentRole === 'viewer') {
+    openViewerSidebar(profile);
+    return;
+  }
+
+  content.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:40px">Carregando...</div>';
+  sidebar.classList.add('active');
+  overlay.classList.add('active');
+
+  try {
+    const details = await fetchJSON(`/agents/${profile}/details`);
+    titleEl.textContent = details.name;
+
+    let html = '';
+
+    // Info grid
+    html += '<div class="sidebar-section">';
+    html += '<div class="sidebar-section-title">Informações</div>';
+    html += '<div class="sidebar-info-grid">';
+    html += `<div class="sidebar-info-item"><div class="sidebar-info-label">Status</div><div class="sidebar-info-value"><span class="status-dot status-${details.status}"></span>${details.status}</div></div>`;
+    html += `<div class="sidebar-info-item"><div class="sidebar-info-label">Modelo</div><div class="sidebar-info-value">${details.model}</div></div>`;
+    html += `<div class="sidebar-info-item"><div class="sidebar-info-label">Operador</div><div class="sidebar-info-value">${details.operator}</div></div>`;
+    html += `<div class="sidebar-info-item"><div class="sidebar-info-label">Papel</div><div class="sidebar-info-value">${details.role}</div></div>`;
+    html += `<div class="sidebar-info-item" style="grid-column:1/3"><div class="sidebar-info-label">Cérebro (path)</div><div class="sidebar-info-value small">${details.brain_path}</div></div>`;
+    html += `<div class="sidebar-info-item" style="grid-column:1/3"><div class="sidebar-info-label">Última Atividade</div><div class="sidebar-info-value">${details.last_activity ? formatTime(details.last_activity) + ' (' + timeAgo(details.last_activity) + ')' : '—'}</div></div>`;
+    html += '</div></div>';
+
+    // Systems
+    if (details.systems && details.systems.length) {
+      html += '<div class="sidebar-section">';
+      html += '<div class="sidebar-section-title">Sistemas Conectados</div>';
+      for (const s of details.systems) {
+        const statusIcon = s.status === 'connected' ? '✅' : '⚪';
+        html += `<div style="display:flex;gap:8px;align-items:center;padding:4px 0"><span>${s.icon}</span><span style="flex:1;font-size:13px">${s.name}</span><span>${statusIcon}</span></div>`;
+      }
+      html += '</div>';
+    }
+
+    // Skills
+    if (details.skills && details.skills.length) {
+      html += '<div class="sidebar-section">';
+      html += `<div class="sidebar-section-title">Skills (${details.skills.length})</div>`;
+      html += '<div class="skills-tags">';
+      for (const s of details.skills) {
+        const label = s.category ? `${s.category}/${s.name}` : s.name;
+        html += `<span class="skill-tag">${label}</span>`;
+      }
+      html += '</div></div>';
+    }
+
+    // Crons
+    if (details.crons && details.crons.length) {
+      html += '<div class="sidebar-section">';
+      html += `<div class="sidebar-section-title">Crons (${details.crons.length})</div>`;
+      for (const c of details.crons) {
+        const statusClass = c.last_status === 'ok' ? 'ok' : (c.last_status === null ? 'never' : 'fail');
+        html += `
+          <div class="sidebar-cron">
+            <div class="cron-status ${statusClass}"></div>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">${c.name}</div>
+              <div style="font-size:11px;color:var(--text-muted)">${c.schedule}</div>
+            </div>
+            <div style="font-size:11px;color:var(--text-secondary)">
+              ${c.next_run_at ? 'próx: ' + formatDateStr(c.next_run_at) : ''}
+            </div>
+          </div>
+        `;
+      }
+      html += '</div>';
+    }
+
+    // Recent sessions
+    if (details.recent_sessions && details.recent_sessions.length) {
+      html += '<div class="sidebar-section">';
+      html += `<div class="sidebar-section-title">Sessões Recentes (${details.recent_sessions.length})</div>`;
+      for (const s of details.recent_sessions) {
+        html += `
+          <div class="sidebar-session">
+            <div class="sidebar-session-title">${s.title}</div>
+            <div class="sidebar-session-meta">
+              <span>${formatTime(s.started_at)}</span>
+              <span>${s.source}</span>
+              <span>${s.message_count || 0} msgs</span>
+              <span>${formatTokens((s.input_tokens||0) + (s.output_tokens||0))} tok</span>
+              <span>${formatCost(s.cost_usd)}</span>
+            </div>
+          </div>
+        `;
+      }
+      html += '</div>';
+    }
+
+    // Incidents
+    if (details.incidents && details.incidents.length) {
+      html += '<div class="sidebar-section">';
+      html += `<div class="sidebar-section-title">🚨 Incidentes (${details.incidents.length})</div>`;
+      for (const inc of details.incidents) {
+        html += `
+          <div class="sidebar-incident">
+            <div class="sidebar-incident-title">${inc.failure_type} — ${inc.state}</div>
+            <div class="sidebar-incident-error" title="${inc.error || ''}">${inc.error || '—'}</div>
+          </div>
+        `;
+      }
+      html += '</div>';
+    }
+
+    content.innerHTML = html;
+  } catch (err) {
+    content.innerHTML = `<div style="color:var(--red);padding:20px">Erro: ${err.message}</div>`;
+  }
+}
+
+// ===== VIEWER SIDEBAR (T3.3) =====
+
+async function openViewerSidebar(profile) {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const content = document.getElementById('sidebarContent');
+  const titleEl = document.getElementById('sidebarTitle');
+
+  content.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:40px">Carregando...</div>';
+  sidebar.classList.add('active');
+  overlay.classList.add('active');
+
+  try {
+    const details = await fetchJSON(`/agents/${profile}/details`);
+    titleEl.textContent = details.name;
+
+    let html = '';
+
+    // Simplified info
+    html += '<div class="sidebar-section">';
+    html += '<div class="sidebar-section-title">Informações</div>';
+    html += '<div class="sidebar-info-grid">';
+    html += `<div class="sidebar-info-item"><div class="sidebar-info-label">Status</div><div class="sidebar-info-value"><span class="status-dot status-${details.status}"></span>${details.status === 'online' ? 'Ativo' : 'Inativo'}</div></div>`;
+    html += `<div class="sidebar-info-item"><div class="sidebar-info-label">Responsável</div><div class="sidebar-info-value">${details.operator}</div></div>`;
+    html += `<div class="sidebar-info-item" style="grid-column:1/3"><div class="sidebar-info-label">Função</div><div class="sidebar-info-value">${details.description}</div></div>`;
+    html += `<div class="sidebar-info-item" style="grid-column:1/3"><div class="sidebar-info-label">Última Atividade</div><div class="sidebar-info-value">${details.last_activity ? timeAgo(details.last_activity) : 'sem registro'}</div></div>`;
+    html += '</div></div>';
+
+    // Systems (simplified)
+    if (details.systems && details.systems.length) {
+      html += '<div class="sidebar-section">';
+      html += '<div class="sidebar-section-title">Sistemas</div>';
+      for (const s of details.systems) {
+        const statusLabel = s.status === 'connected' ? '✅ Conectado' : '⚪ Pendente';
+        html += `<div style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px"><span>${s.icon}</span><span style="flex:1">${s.name}</span><span style="font-size:11px;color:var(--text-muted)">${statusLabel}</span></div>`;
+      }
+      html += '</div>';
+    }
+
+    // Skills count only
+    if (details.skills && details.skills.length) {
+      html += '<div class="sidebar-section">';
+      html += `<div class="sidebar-section-title">Capacidades</div>`;
+      html += `<div style="font-size:14px;color:var(--text-secondary)">${details.skills.length} skills configuradas</div>`;
+      html += '</div>';
+    }
+
+    content.innerHTML = html;
+  } catch (err) {
+    content.innerHTML = `<div style="color:var(--red);padding:20px">Erro: ${err.message}</div>`;
+  }
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('active');
+  document.getElementById('sidebarOverlay').classList.remove('active');
+}
+
+// Close sidebar on Escape
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+// ===== AUTO-REFRESH (T3.2) =====
+
+function startAutoRefresh() {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  autoRefreshTimer = setInterval(() => {
+    if (!document.hidden) {
+      refreshAll(true); // silent refresh
+    }
+  }, AUTO_REFRESH_INTERVAL);
+  document.getElementById('autoRefreshDot').classList.remove('paused');
+  document.getElementById('autoRefreshText').textContent = 'Auto-refresh 60s';
+}
+
+// Pause auto-refresh when tab is hidden
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    document.getElementById('autoRefreshDot').classList.add('paused');
+    document.getElementById('autoRefreshText').textContent = 'Pausado';
+  } else {
+    document.getElementById('autoRefreshDot').classList.remove('paused');
+    document.getElementById('autoRefreshText').textContent = 'Auto-refresh 60s';
+    refreshAll(true); // refresh on return
+  }
+});
+
+// ===== TOKEN MONITOR =====
+
+function usageBarColor(pct) {
+  if (pct < 50) return 'green';
+  if (pct <= 80) return 'yellow';
+  return 'red';
+}
+
+function renderUsageLive(data) {
+  const el = document.getElementById('usageLiveBars');
+  if (!data || data.error || !data.session_used) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Dados de uso indisponíveis</div>';
+    return;
+  }
+
+  const sessionColor = usageBarColor(data.session_used);
+  const weekColor = usageBarColor(data.week_used);
+
+  el.innerHTML = `
+    <div class="usage-bar-container">
+      <div class="usage-bar-label">
+        <span class="label-left">🕐 Janela de Sessão (5h)</span>
+        <span class="label-right">Reset em ${data.session_reset_in} — ${data.session_reset_at}</span>
+      </div>
+      <div class="usage-bar-track">
+        <div class="usage-bar-fill ${sessionColor}" style="width:${data.session_used}%">${data.session_used}%</div>
+      </div>
+    </div>
+    <div class="usage-bar-container">
+      <div class="usage-bar-label">
+        <span class="label-left">📅 Janela Semanal</span>
+        <span class="label-right">Reset em ${data.week_reset_in} — ${data.week_reset_at}</span>
+      </div>
+      <div class="usage-bar-track">
+        <div class="usage-bar-fill ${weekColor}" style="width:${data.week_used}%">${data.week_used}%</div>
+      </div>
+    </div>
+  `;
+
+  // Alert
+  const alertEl = document.getElementById('usageAlert');
+  const maxUsed = Math.max(data.session_used, data.week_used);
+  if (maxUsed > 80) {
+    alertEl.style.display = 'flex';
+    alertEl.className = 'usage-alert red';
+    alertEl.innerHTML = '🚨 <strong>Consumo crítico!</strong>&nbsp;Considere adiar tarefas pesadas pro próximo reset.';
+  } else if (maxUsed > 70) {
+    alertEl.style.display = 'flex';
+    alertEl.className = 'usage-alert yellow';
+    alertEl.innerHTML = '⚠️ <strong>Consumo alto</strong>&nbsp;— considere agendar tarefas pesadas pro próximo reset.';
+  } else if (maxUsed > 50) {
+    alertEl.style.display = 'flex';
+    alertEl.className = 'usage-alert yellow';
+    alertEl.innerHTML = '📊 Consumo moderado — acompanhe o uso.';
+  } else {
+    alertEl.style.display = 'flex';
+    alertEl.className = 'usage-alert green';
+    alertEl.innerHTML = '✅ Consumo saudável — tokens disponíveis.';
+  }
+}
+
+function renderUsageByAgent(agents) {
+  const el = document.getElementById('usageByAgent');
+  if (!agents || !agents.length) { el.innerHTML = ''; return; }
+
+  let html = '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Uso por Agente</div>';
+  html += '<div class="agent-usage-grid">';
+  for (const a of agents) {
+    html += `
+      <div class="agent-usage-card">
+        <div class="agent-usage-name">${a.name}</div>
+        <div class="agent-usage-row"><span class="lbl">Hoje</span><span class="val">${formatTokens(a.today.tokens)} tok · ${formatCost(a.today.cost)} · ${a.today.sessions} sessões</span></div>
+        <div class="agent-usage-row"><span class="lbl">Semana</span><span class="val">${formatTokens(a.week.tokens)} tok · ${formatCost(a.week.cost)} · ${a.week.sessions} sessões</span></div>
+      </div>
+    `;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function renderUsageHourly(data) {
+  const el = document.getElementById('usageHourly');
+  if (!data || !data.totals) { el.innerHTML = ''; return; }
+
+  const totals = data.totals;
+  const maxVal = Math.max(...totals, 1);
+
+  let html = '<div class="hourly-heatmap-title">📊 Consumo por Horário (últimos 7 dias, BRT)</div>';
+  html += '<div class="hourly-grid">';
+  for (let h = 0; h < 24; h++) {
+    const val = totals[h];
+    const intensity = val / maxVal;
+    let bg;
+    if (intensity === 0) {
+      bg = 'rgba(255,255,255,0.03)';
+    } else if (intensity < 0.25) {
+      bg = `rgba(34,197,94,${0.2 + intensity * 0.8})`;
+    } else if (intensity < 0.5) {
+      bg = `rgba(59,130,246,${0.3 + intensity * 0.7})`;
+    } else if (intensity < 0.75) {
+      bg = `rgba(234,179,8,${0.4 + intensity * 0.5})`;
+    } else {
+      bg = `rgba(239,68,68,${0.5 + intensity * 0.5})`;
+    }
+    const tooltip = `${h}h: ${formatTokens(val)} tokens`;
+    html += `<div class="hourly-cell" style="background:${bg}" title="${tooltip}">${val > 0 ? formatTokens(val) : ''}</div>`;
+  }
+  html += '</div>';
+  html += '<div class="hourly-labels">';
+  for (let h = 0; h < 24; h++) {
+    html += `<div class="hourly-label">${h}h</div>`;
+  }
+  html += '</div>';
+
+  // Peak hours advice
+  const sorted = totals.map((v, i) => ({h: i, v})).sort((a, b) => b.v - a.v);
+  const peak = sorted.filter(x => x.v > 0).slice(0, 3);
+  if (peak.length) {
+    const peakStr = peak.map(p => `${p.h}h`).join(', ');
+    html += `<div style="margin-top:10px;font-size:12px;color:var(--text-muted)">🔥 Picos: ${peakStr} — evite tarefas pesadas nesses horários se próximo do limite.</div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+// ===== MAIN REFRESH =====
+
+async function refreshAll(silent = false) {
+  if (loading) return;
+  loading = true;
+  const btn = document.getElementById('btnRefresh');
+  if (!silent) btn.classList.add('loading');
+
+  try {
+    // For viewer, only fetch what's needed
+    if (currentRole === 'viewer') {
+      const [agents, metrics, usageLive, usageByAgent] = await Promise.all([
+        fetchJSON('/agents'),
+        fetchJSON('/metrics/summary'),
+        fetchJSON('/usage/live'),
+        fetchJSON('/usage/by-agent'),
+      ]);
+      if (!agents || !metrics) return;
+      renderMetrics(metrics);
+      renderAgentMap(agents);
+      renderViewerSummary(agents, metrics);
+      renderUsageLive(usageLive);
+      renderUsageByAgent(usageByAgent);
+    } else {
+      const [agents, metrics, crons, systems, activity, tokens, timeline, delegations, usageLive, usageHourly, usageByAgent] = await Promise.all([
+        fetchJSON('/agents'),
+        fetchJSON('/metrics/summary'),
+        fetchJSON('/crons'),
+        fetchJSON('/systems'),
+        fetchJSON('/activity'),
+        fetchJSON('/metrics/tokens'),
+        fetchJSON('/activity/timeline'),
+        fetchJSON('/delegations'),
+        fetchJSON('/usage/live'),
+        fetchJSON('/usage/hourly'),
+        fetchJSON('/usage/by-agent'),
+      ]);
+      if (!agents) return;
+
+      renderMetrics(metrics);
+      renderAgentMap(agents);
+      renderCrons(crons);
+      renderSystems(systems);
+      renderActivity(activity);
+      renderTokenChart(tokens);
+      renderTimeline(timeline);
+      renderDelegations(delegations);
+      renderUsageLive(usageLive);
+      renderUsageHourly(usageHourly);
+      renderUsageByAgent(usageByAgent);
+    }
+
+    const now = new Date();
+    document.getElementById('lastUpdate').textContent =
+      `Atualizado: ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+  } catch (err) {
+    console.error('Refresh error:', err);
+  } finally {
+    loading = false;
+    btn.classList.remove('loading');
+  }
+}
+
+// ===== INIT =====
+
+async function init() {
+  await loadUserInfo();
+  await refreshAll();
+  startAutoRefresh();
+}
+
+init();
+</script>
+</body>
+</html>
